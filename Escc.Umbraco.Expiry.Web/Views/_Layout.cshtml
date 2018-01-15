@@ -1,0 +1,21 @@
+﻿@using ClientDependency.Core.Mvc
+@{
+    Html.RequiresJs("~/Scripts/jquery-1.10.2.js");
+    Html.RequiresJs("~/Scripts/bootstrap.js");
+    Html.RequiresCss("~/Content/bootstrap.css");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    @Html.RenderCssHere()
+</head>
+<body>
+    <div class="container body-content">
+        @RenderBody()
+    </div>
+    @Html.RenderJsHere()
+</body>
+</html>

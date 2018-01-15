@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escc.Umbraco.Expiry", "Escc.Umbraco.Expiry\Escc.Umbraco.Expiry.csproj", "{AED48624-F380-43DB-94B8-B38F201981C8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5EF73422-72AB-4707-946A-08F37A7F3348}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		app-setup-dev.cmd = app-setup-dev.cmd
+		app-setup-dev.ps1 = app-setup-dev.ps1
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escc.Umbraco.Expiry.Notifier", "Escc.Umbraco.Expiry.Notifier\Escc.Umbraco.Expiry.Notifier.csproj", "{208D3B69-69C6-4F80-B6C0-56DA53910FA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escc.Umbraco.Expiry.Web", "Escc.Umbraco.Expiry.Web\Escc.Umbraco.Expiry.Web.csproj", "{478A29F8-7361-4EA1-BCA6-0C19865CFE85}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AED48624-F380-43DB-94B8-B38F201981C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AED48624-F380-43DB-94B8-B38F201981C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AED48624-F380-43DB-94B8-B38F201981C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AED48624-F380-43DB-94B8-B38F201981C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{208D3B69-69C6-4F80-B6C0-56DA53910FA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{208D3B69-69C6-4F80-B6C0-56DA53910FA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{208D3B69-69C6-4F80-B6C0-56DA53910FA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{208D3B69-69C6-4F80-B6C0-56DA53910FA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{478A29F8-7361-4EA1-BCA6-0C19865CFE85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{478A29F8-7361-4EA1-BCA6-0C19865CFE85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{478A29F8-7361-4EA1-BCA6-0C19865CFE85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{478A29F8-7361-4EA1-BCA6-0C19865CFE85}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3A3DA29B-2431-41E8-8AFE-9D5C5EF6EFDE}
+	EndGlobalSection
+EndGlobal

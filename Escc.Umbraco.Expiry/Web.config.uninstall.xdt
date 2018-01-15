@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <UnpublishOverridesSection>
+    <ContentTypes xdt:Transform="Remove" xdt:Locator="Condition(count(add) = 0)" />
+    <Paths xdt:Transform="Remove"  xdt:Locator="Condition(count(add) = 0)" />
+  </UnpublishOverridesSection>
+  <UnpublishOverridesSection xdt:Transform="Remove" xdt:Locator="Condition(count(add) = 0)" />
+  <configSections>
+    <section name="UnpublishOverridesSection" type="Escc.Umbraco.UnpublishOverrides.UnpublishOverridesSection, Escc.Umbraco" requirePermission="false" xdt:Transform="Remove" xdt:Locator="Condition(@name='UnpublishOverridesSection' and not(/configuration/Escc.Umbraco/UnpublishOverridesSection))" />
+  </configSections>
+  <configSections xdt:Transform="Remove" xdt:Locator="Condition(count(*) = 0)" />
+</configuration>
