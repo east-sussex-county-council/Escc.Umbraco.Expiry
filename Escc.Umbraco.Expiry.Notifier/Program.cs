@@ -16,7 +16,7 @@ namespace Escc.Umbraco.Expiry.Notifier
         {
             try
             {
-                log.Info("Checking for expring nodes");
+                log.Info("Checking for expiring nodes");
 
                 int inTheNextHowManyDays;
                 int emailAdminAtDays;
@@ -73,7 +73,7 @@ namespace Escc.Umbraco.Expiry.Notifier
                 try
                 {
                     var sentTo = emailService.UserPageLastWarningEmail(warningList.OrderBy(o => o.ExpiryDate).ToList());
-                    log.Info("Warning Email Sent to: " + sentTo);
+                    if (sentTo != null) log.Info("Warning Email Sent to: " + sentTo);
                 }
                 catch (Exception ex)
                 {
@@ -92,16 +92,19 @@ namespace Escc.Umbraco.Expiry.Notifier
                     try
                     {
                         var sentTo = emailService.UserPageExpiryEmail(user);
-                        var jsonPages = JsonConvert.SerializeObject(user.Pages);
-                        logRepository.SetExpiryLogDetails(new ExpiryLogEntry(0, sentTo, DateTime.Now, true, jsonPages));
-                        if (!String.IsNullOrEmpty(sentTo)) log.Info("Expiry Email Sent to: " + sentTo);
+                        if (!String.IsNullOrEmpty(sentTo))
+                        {
+                            var jsonPages = JsonConvert.SerializeObject(user.Pages);
+                            logRepository.SetExpiryLogDetails(new ExpiryLogEntry(0, sentTo, DateTime.Now, true, jsonPages));
+                            log.Info("Expiry Email Sent to: " + sentTo);
+                        }
                     }
                     catch (Exception ex)
                     {
                         log.Error("Failure sending email to:" + user.User.EmailAddress);
                         var jsonPages = JsonConvert.SerializeObject(user.Pages);
                         logRepository.SetExpiryLogDetails(new ExpiryLogEntry(0, user.User.EmailAddress, DateTime.Now, false, jsonPages));
-                        new Exception(ex.ToString()).ToExceptionless().Submit();
+                        ex.ToExceptionless().Submit();
                     }
                 }
             }

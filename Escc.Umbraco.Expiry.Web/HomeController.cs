@@ -129,8 +129,8 @@ namespace Escc.Umbraco.Expiry.Web
             //Populate the DataTable
             foreach (var model in modelList)
             {
-                HtmlString Email = new HtmlString("<a href=mailto:" + model.EmailAddress + ">" + model.EmailAddress + "</a>");
-                var pagesString = this.Url.Action("GetPages", "ExpiryEmailStats", new { ID = model.Id }, this.Request.Url.Scheme);
+                HtmlString Email = new HtmlString("<a href='mailto:" + model.EmailAddress + "'>" + model.EmailAddress + "</a>");
+                var pagesString = this.Url.Action("GetPages", "Home", new { ID = model.Id }, this.Request.Url.Scheme);
                 HtmlString Pages = new HtmlString(string.Format("<a href=\"{0}\" class=\"btn btn-info\">Pages</a> <span class=\"badge badge-info\">{1}</span>", pagesString, CountPages(model.Id)));
                 table.Rows.Add(model.Id, Email, model.DateAdded, Pages);
             }

@@ -57,6 +57,10 @@ namespace Escc.Umbraco.Expiry.Notifier
                     {
                         exception.ToExceptionless().Submit();
                     }
+                    catch (InvalidOperationException exception)
+                    {
+                        exception.ToExceptionless().Submit();
+                    }
                 }
             }
         }
