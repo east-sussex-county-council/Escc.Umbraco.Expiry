@@ -58,7 +58,7 @@ namespace Escc.Umbraco.Expiry
             {
                 // if the node is expiring within the declared period, add it to the list
                 // if the node has a null expire date and is published, also add it to the list as it is a neverexpiring page
-                if(node.ExpireDate > DateTime.Now && node.ExpireDate < DateTime.Now.AddDays(inTheNextHowManyDays) || node.ExpireDate == null && node.HasPublishedVersion == true)
+                if (node.ExpireDate > DateTime.Now && node.ExpireDate < DateTime.Now.AddDays(inTheNextHowManyDays) || node.ExpireDate == null && node.HasPublishedVersion == true)
                 {
                     expiringNodes.Add(node);
                 }
@@ -77,15 +77,16 @@ namespace Escc.Umbraco.Expiry
             IList<UmbracoPagesForUser> userPages = new List<UmbracoPagesForUser>();
 
             // Create a admin account record. Use -1 as an Id as there won't be a valid Umbraco user with that value.
-            var admin = new UmbracoPagesForUser();
-            var adminUser = new UmbracoUser
+            var admin = new UmbracoPagesForUser()
             {
-                UserId = -1,
-                UserName = _adminAccountName.Replace(" ", ""),
-                FullName = _adminAccountName,
-                EmailAddress = _adminAccountEmail
+                User = new UmbracoUser
+                {
+                    UserId = -1,
+                    UserName = _adminAccountName?.Replace(" ", ""),
+                    FullName = _adminAccountName,
+                    EmailAddress = _adminAccountEmail
+                }
             };
-            admin.User = adminUser;
             userPages.Add(admin);
 
             foreach (var expiringNode in expiringNodes)
@@ -102,71 +103,70 @@ namespace Escc.Umbraco.Expiry
                 // Get Web Authors with permission
                 // if no permissions at all, then there will be only one element which will contain a "-"
                 // If only the default permission then there will only be one element which will contain "F" (Browse Node)
-                var perms =
+                var permissionsForNode =
                     _contentService.GetPermissionsForEntity(expiringNode)
                         .Where(
                             x =>
                                 x.AssignedPermissions.Count() > 1 ||
                                 (x.AssignedPermissions[0] != "-" && x.AssignedPermissions[0] != "F"));
-                
-                var nodeAuthors = perms as IList<EntityPermission> ?? perms.ToList();
 
-                // if no Web Authors, add this page to the WebStaff list
-                if (!nodeAuthors.Any())
+
+                // If there are no active users with permissions to the page, add the page to the admin list
+                var pageHasActiveUserWithPermissions = false;
+                foreach (var permission in permissionsForNode)
                 {
-
-                    userPages.Where(p => p.User.UserId == -1).ForEach(u => u.Pages.Add(userPage));
-                    continue;
-                }
-
-                // if all Authors of a page are disabled, add page to the webStaff list
-                List<EntityPermission> disabledUsers = new List<EntityPermission>();
-                foreach (var user in nodeAuthors)
-                {
-                    var tempUser = _userService.GetUserById(user.UserId);
-                    if (!tempUser.IsApproved)
+                    var usersInGroup = _userService.GetAllInGroup(permission.UserGroupId);
+                    foreach (var user in usersInGroup)
                     {
-                        disabledUsers.Add(user);
+                        if (user.IsApproved)
+                        {
+                            pageHasActiveUserWithPermissions = true;
+                            break;
+                        }
                     }
+                    if (pageHasActiveUserWithPermissions) break;
                 }
-                if(disabledUsers.Count == nodeAuthors.Count)
+                if (!pageHasActiveUserWithPermissions)
                 {
-                    userPages.Where(p => p.User.UserId == -1).ForEach(u => u.Pages.Add(userPage));
+                    admin.Pages.Add(userPage);
                     continue;
                 }
 
                 // Add the current page to each user that has edit rights
-                foreach (var author in nodeAuthors)
+                foreach (var permission in permissionsForNode)
                 {
-                    var user = userPages.FirstOrDefault(f => f.User.UserId == author.UserId);
-
-                    // Create a User record if one does not yet exist
-                    if (user == null)
+                    var usersInGroup = _userService.GetAllInGroup(permission.UserGroupId);
+                    foreach (var user in usersInGroup)
                     {
-                        var pUser = _userService.GetUserById(author.UserId);
+                        var pagesForUser = userPages.FirstOrDefault(f => f.User.UserId == user.Id);
 
-                        // Check that this author is not Disabled / Locked Out
-                        // If they are, end this loop and move onto the next author
-                        if (!pUser.IsApproved) continue;
-
-                        var p = new UmbracoUser
+                        // Create a User record if one does not yet exist
+                        if (pagesForUser == null)
                         {
-                            UserId = author.UserId,
-                            UserName = pUser.Username,
-                            FullName = pUser.Name,
-                            EmailAddress = pUser.Email
-                        };
+                            // Check that this author is not Disabled / Locked Out
+                            // If they are, end this loop and move onto the next author
+                            if (!user.IsApproved) continue;
 
-                        user = new UmbracoPagesForUser {User = p};
-                        userPages.Add(user);
+                            pagesForUser = new UmbracoPagesForUser
+                            {
+                                User = new UmbracoUser
+                                {
+                                    UserId = user.Id,
+                                    UserName = user.Username,
+                                    FullName = user.Name,
+                                    EmailAddress = user.Email
+                                }
+                            };
+                            userPages.Add(pagesForUser);
+                        }
+
+                        // Assign the current page to this author
+                       pagesForUser.Pages.Add(userPage);
                     }
-
-                    // Assign the current page (outer loop) to this author
-                    userPages.Where(p => p.User.UserId == user.User.UserId).ForEach(u => u.Pages.Add(userPage));
                 }
             }
 
-            // Return a list of users to email, along with the page details
+            // Return a list of users responsible, along with the page details
             return userPages;
         }
     }
