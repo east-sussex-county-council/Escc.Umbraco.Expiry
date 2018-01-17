@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 
@@ -30,11 +31,17 @@ namespace Escc.Umbraco.Expiry.Notifier
             _client = new HttpClient(handler) { BaseAddress = new Uri(siteUri), Timeout = TimeSpan.FromMinutes(5)};
         }
 
+        /// <summary>
+        /// Gets the pages due to expire in the next <c>inTheNextHowManyDays</c> days, collated by the users responsible for the pages.
+        /// </summary>
+        /// <param name="inTheNextHowManyDays">The date range to look for expiring pages, based on the number of days from today.</param>
+        /// <returns></returns>
+        /// <exception cref="WebException"></exception>
         public IList<UmbracoPagesForUser> GetExpiringPagesByUser(int inTheNextHowManyDays)
         {
             var response = _client.GetAsync(string.Format("CheckForExpiringNodesByUser?inTheNextHowManyDays={0}", inTheNextHowManyDays)).Result;
 
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
             var modelList = response.Content.ReadAsAsync<IList<UmbracoPagesForUser>>().Result;
             return modelList;
         }

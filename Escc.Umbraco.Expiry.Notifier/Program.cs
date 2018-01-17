@@ -1,5 +1,6 @@
 ﻿using Exceptionless;
 using log4net;
+using log4net.Config;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,12 +11,15 @@ namespace Escc.Umbraco.Expiry.Notifier
 {
     class Program
     {
-        private static readonly ILog log = LogManager.GetLogger("RollingFileAppender");
+        private static readonly ILog log = LogManager.GetLogger(typeof(Program));
 
         static void Main(string[] args)
         {
             try
             {
+                ExceptionlessClient.Current.Startup();
+                XmlConfigurator.Configure();
+
                 log.Info("Checking for expiring nodes");
 
                 int inTheNextHowManyDays;
@@ -43,8 +47,12 @@ namespace Escc.Umbraco.Expiry.Notifier
             }
             catch (Exception ex)
             {
-                log.Error("Process failed - check Exceptionless");
+                log.Error(ex.Message);
                 ex.ToExceptionless().Submit();
+            }
+            finally
+            {
+                ExceptionlessClient.Current.ProcessQueue();
             }
         }
 
@@ -73,11 +81,11 @@ namespace Escc.Umbraco.Expiry.Notifier
                 try
                 {
                     var sentTo = emailService.UserPageLastWarningEmail(warningList.OrderBy(o => o.ExpiryDate).ToList());
-                    if (sentTo != null) log.Info("Warning Email Sent to: " + sentTo);
+                    if (sentTo != null) log.Info("Warning email sent to: " + sentTo);
                 }
                 catch (Exception ex)
                 {
-                    log.Error("Failure sending warning email to admins - Check Exceptionless");
+                    log.Error("Failure sending warning email to admins - " + ex.Message);
                     ex.ToExceptionless().Submit();
                 }
             }
@@ -89,21 +97,32 @@ namespace Escc.Umbraco.Expiry.Notifier
             {
                 if (user.Pages.Any())
                 {
+                    string sentTo = null;
                     try
                     {
-                        var sentTo = emailService.UserPageExpiryEmail(user);
+                        sentTo = emailService.UserPageExpiryEmail(user);
                         if (!String.IsNullOrEmpty(sentTo))
                         {
-                            var jsonPages = JsonConvert.SerializeObject(user.Pages);
-                            logRepository.SetExpiryLogDetails(new ExpiryLogEntry(0, sentTo, DateTime.Now, true, jsonPages));
-                            log.Info("Expiry Email Sent to: " + sentTo);
+                            log.Info("Expiry email sent to: " + sentTo);
                         }
                     }
                     catch (Exception ex)
                     {
-                        log.Error("Failure sending email to:" + user.User.EmailAddress);
-                        var jsonPages = JsonConvert.SerializeObject(user.Pages);
-                        logRepository.SetExpiryLogDetails(new ExpiryLogEntry(0, user.User.EmailAddress, DateTime.Now, false, jsonPages));
+                        log.Error("Failure sending email to:" + user.User.EmailAddress + " - " + ex.Message);
+                        ex.ToExceptionless().Submit();
+                    }
+
+                    try
+                    {
+                        if (!String.IsNullOrEmpty(sentTo))
+                        {
+                            var jsonPages = JsonConvert.SerializeObject(user.Pages);
+                            logRepository.SetExpiryLogDetails(new ExpiryLogEntry(0, sentTo, DateTime.Now, true, jsonPages));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error("Failure saving to expiry log: " + ex.Message);
                         ex.ToExceptionless().Submit();
                     }
                 }

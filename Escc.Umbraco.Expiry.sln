@@ -8,6 +8,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5EF73422-72AB-4707-946A-08F37A7F3348}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		app-install-notifier.cmd = app-install-notifier.cmd
+		app-install-notifier.ps1 = app-install-notifier.ps1
 		app-install-website.cmd = app-install-website.cmd
 		app-install-website.ps1 = app-install-website.ps1
 		app-setup-dev.cmd = app-setup-dev.cmd
