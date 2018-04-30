@@ -221,10 +221,11 @@
   <ItemGroup>
     <Compile Include="ExpiryLogEntry.cs" />
     <Compile Include="IExpiryLogRepository.cs" />
-    <Compile Include="PageExpiryService.cs" />
+    <Compile Include="ExaminePageExpiryService.cs" />
     <Compile Include="IPageExpiryService.cs" />
     <Compile Include="PetaPoco.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SaveExpiryDateToExamineEventHandler.cs" />
     <Compile Include="SqlServerExpiryLogRepository.cs" />
     <Compile Include="UmbracoUser.cs" />
     <Compile Include="ExpiryRulesEventHandler.cs" />
