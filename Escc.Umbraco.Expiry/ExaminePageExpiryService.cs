@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Examine;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Models;
@@ -13,10 +15,11 @@ namespace Escc.Umbraco.Expiry
     /// A service that provides information about pages due to expire by querying the Umbraco content service
     /// </summary>
     /// <seealso cref="Escc.Umbraco.Expiry.IPageExpiryService" />
-    public class PageExpiryService : IPageExpiryService
+    public class ExaminePageExpiryService : IPageExpiryService
     {
         private readonly IContentService _contentService;
         private readonly UmbracoHelper _umbracoHelper;
+        private readonly ISearcher _examineSearcher;
         private readonly IUserService _userService;
         private readonly string _adminAccountName;
         private readonly string _adminAccountEmail;
@@ -24,16 +27,28 @@ namespace Escc.Umbraco.Expiry
         /// <summary>
         /// Initializes a new instance of the <see cref="PageExpiryService" /> class.
         /// </summary>
+        /// <param name="examineSearcher">The examine searcher.</param>
         /// <param name="userService">The user service.</param>
         /// <param name="contentService">The content service.</param>
         /// <param name="umbracoHelper">An instance of UmbracoHelper.</param>
         /// <param name="adminAccountName">Name of an Umbraco admin account.</param>
         /// <param name="adminAccountEmail">The email address of an Umbraco admin account.</param>
-        public PageExpiryService(IUserService userService, IContentService contentService, UmbracoHelper umbracoHelper, string adminAccountName, string adminAccountEmail)
+        public ExaminePageExpiryService(ISearcher examineSearcher, IUserService userService, IContentService contentService, UmbracoHelper umbracoHelper, string adminAccountName, string adminAccountEmail)
         {
-            _userService = userService;
-            _contentService = ApplicationContext.Current.Services.ContentService;
-            _umbracoHelper = umbracoHelper;
+            if (string.IsNullOrEmpty(adminAccountName))
+            {
+                throw new ArgumentException("message", nameof(adminAccountName));
+            }
+
+            if (string.IsNullOrEmpty(adminAccountEmail))
+            {
+                throw new ArgumentException("message", nameof(adminAccountEmail));
+            }
+
+            _examineSearcher = examineSearcher ?? throw new ArgumentNullException(nameof(examineSearcher));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _contentService = contentService ?? throw new ArgumentNullException(nameof(contentService));
+            _umbracoHelper = umbracoHelper ?? throw new ArgumentNullException(nameof(umbracoHelper));
             _adminAccountName = adminAccountName;
             _adminAccountEmail = adminAccountEmail;
         }
@@ -49,29 +64,14 @@ namespace Escc.Umbraco.Expiry
         /// </returns>
         public IList<UmbracoPagesForUser> GetExpiringNodesByUser(int inTheNextHowManyDays)
         {
-            // Get all content at the root
-            var rootnodes = _contentService.GetRootContent();
-            // Create a list to store expiring content
-            List<IContent> expiringNodes = new List<IContent>();
-            // for each content node at the root
-            foreach (var node in rootnodes)
-            {
-                // if the node is expiring within the declared period, add it to the list
-                // if the node has a null expire date and is published, also add it to the list as it is a neverexpiring page
-                if(node.ExpireDate > DateTime.Now && node.ExpireDate < DateTime.Now.AddDays(inTheNextHowManyDays) || node.ExpireDate == null && node.HasPublishedVersion == true)
-                {
-                    expiringNodes.Add(node);
-                }
-                // get the root nodes children that are expiring within the declared period. Or have a null expiry date and are published
-                var descendants = node.Descendants().Where(nn => nn.ExpireDate > DateTime.Now && nn.ExpireDate < DateTime.Now.AddDays(inTheNextHowManyDays) || nn.ExpireDate == null && nn.HasPublishedVersion == true).OrderBy(nn => nn.ExpireDate);
-                foreach (var child in descendants)
-                {
-                    // add each one to the list
-                    expiringNodes.Add(child);
-                }
-            }
-            // once done, order by expire date.
-            expiringNodes.OrderBy(nn => nn.ExpireDate);
+            // if the node is expiring within the declared period, add it to the list
+            // if the node has a null expire date and is published, also add it to the list as it is a never expiring page
+            // (Note: This should be the External index, so all results are published nodes)
+            var query = _examineSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+            query.Range("expireDate", DateTime.Today, DateTime.Today.AddDays(inTheNextHowManyDays)).Or().Field("expireDate", "99991231235959");
+
+            // Sorting using Examine would be faster but was not working, so sort the results in .NET
+            var expiringNodes = _examineSearcher.Search(query).OrderBy(result => result.Fields["expireDate"].ToString());
 
             // For each page:
             IList<UmbracoPagesForUser> userPages = new List<UmbracoPagesForUser>();
@@ -92,18 +92,22 @@ namespace Escc.Umbraco.Expiry
             {
                 var userPage = new UmbracoPage
                     {
-                        PageId = expiringNode.Id,
-                        PageName = expiringNode.Name,
-                        PagePath = expiringNode.Path,
-                        PageUrl = _umbracoHelper.NiceUrl(expiringNode.Id),
-                        ExpiryDate = (DateTime?)expiringNode.ExpireDate
+                        PageId = Int32.Parse(expiringNode.Fields["__NodeId"], CultureInfo.InvariantCulture),
+                        PageName = expiringNode.Fields["nodeName"],
+                        PagePath = expiringNode.Fields["path"]
                     };
+                userPage.PageUrl = _umbracoHelper.NiceUrl(userPage.PageId);
+                if (expiringNode.Fields["expireDate"] != "99991231235959")
+                {
+                    var expireDate = expiringNode.Fields["expireDate"].ToString();
+                    userPage.ExpiryDate = new DateTime(Int32.Parse(expireDate.Substring(0, 4)), Int32.Parse(expireDate.Substring(4, 2)), Int32.Parse(expireDate.Substring(6, 2)), Int32.Parse(expireDate.Substring(8, 2)), Int32.Parse(expireDate.Substring(10, 2)), Int32.Parse(expireDate.Substring(12, 2)));
+                }
 
                 // Get Web Authors with permission
                 // if no permissions at all, then there will be only one element which will contain a "-"
                 // If only the default permission then there will only be one element which will contain "F" (Browse Node)
                 var perms =
-                    _contentService.GetPermissionsForEntity(expiringNode)
+                    _contentService.GetPermissionsForEntity(_contentService.GetById(userPage.PageId))
                         .Where(
                             x =>
                                 x.AssignedPermissions.Count() > 1 ||
@@ -115,7 +119,10 @@ namespace Escc.Umbraco.Expiry
                 if (!nodeAuthors.Any())
                 {
 
-                    userPages.Where(p => p.User.UserId == -1).ForEach(u => u.Pages.Add(userPage));
+                    foreach (var adminPages in userPages.Where(p => p.User.UserId == -1))
+                    {
+                        adminPages.Pages.Add(userPage);
+                    }
                     continue;
                 }
 
@@ -131,7 +138,10 @@ namespace Escc.Umbraco.Expiry
                 }
                 if(disabledUsers.Count == nodeAuthors.Count)
                 {
-                    userPages.Where(p => p.User.UserId == -1).ForEach(u => u.Pages.Add(userPage));
+                    foreach (var adminPages in userPages.Where(p => p.User.UserId == -1))
+                    {
+                        adminPages.Pages.Add(userPage);
+                    }
                     continue;
                 }
 
@@ -162,7 +172,10 @@ namespace Escc.Umbraco.Expiry
                     }
 
                     // Assign the current page (outer loop) to this author
-                    userPages.Where(p => p.User.UserId == user.User.UserId).ForEach(u => u.Pages.Add(userPage));
+                    foreach (var authorPages in userPages.Where(p => p.User.UserId == user.User.UserId))
+                    {
+                        authorPages.Pages.Add(userPage);
+                    }
                 }
             }
 

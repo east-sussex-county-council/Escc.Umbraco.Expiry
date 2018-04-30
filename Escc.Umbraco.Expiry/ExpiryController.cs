@@ -10,7 +10,7 @@ using Umbraco.Web;
 using Umbraco.Web.WebApi;
 using System.Net;
 using System.Configuration;
-using Exceptionless;
+using Examine;
 
 namespace Escc.Umbraco.Expiry
 {
@@ -30,7 +30,7 @@ namespace Escc.Umbraco.Expiry
         {
             try
             {
-                var expiringPagesService = new PageExpiryService(Services.UserService, Services.ContentService,  Umbraco, ConfigurationManager.AppSettings["AdminAccountName"], ConfigurationManager.AppSettings["AdminAccountEmail"]);
+                var expiringPagesService = new ExaminePageExpiryService(ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"], Services.UserService, Services.ContentService,  Umbraco, ConfigurationManager.AppSettings["AdminAccountName"], ConfigurationManager.AppSettings["AdminAccountEmail"]);
                 var nodes = expiringPagesService.GetExpiringNodesByUser(inTheNextHowManyDays);
 
                 return Request.CreateResponse(HttpStatusCode.OK, nodes);
