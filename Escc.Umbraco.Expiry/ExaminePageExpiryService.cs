@@ -23,6 +23,7 @@ namespace Escc.Umbraco.Expiry
         private readonly IUserService _userService;
         private readonly string _adminAccountName;
         private readonly string _adminAccountEmail;
+        private readonly Dictionary<int, IEnumerable<EntityPermission>> _permissions = new Dictionary<int, IEnumerable<EntityPermission>>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExaminePageExpiryService" /> class.
@@ -119,16 +120,7 @@ namespace Escc.Umbraco.Expiry
                     userPage.ExpiryDate = new DateTime(Int32.Parse(expireDate.Substring(0, 4)), Int32.Parse(expireDate.Substring(4, 2)), Int32.Parse(expireDate.Substring(6, 2)), Int32.Parse(expireDate.Substring(8, 2)), Int32.Parse(expireDate.Substring(10, 2)), Int32.Parse(expireDate.Substring(12, 2)));
                 }
 
-                // Get Web Authors with permission
-                // if no permissions at all, then there will be only one element which will contain a "-"
-                // If only the default permission then there will only be one element which will contain "F" (Browse Node)
-                var permissionsForNode =
-                    _contentService.GetPermissionsForEntity(_contentService.GetById(userPage.PageId))
-                        .Where(
-                            x =>
-                                x.AssignedPermissions.Count() > 1 ||
-                                (x.AssignedPermissions[0] != "-" && x.AssignedPermissions[0] != "F"));
-
+                var permissionsForNode = GetPermissionsForNodeWithInheritance(_contentService.GetById(userPage.PageId));
 
                 // If there are no active users with permissions to the page, add the page to the admin list
                 var pageHasActiveUserWithPermissions = false;
@@ -180,13 +172,46 @@ namespace Escc.Umbraco.Expiry
                         }
 
                         // Assign the current page to this author
-                       pagesForUser.Pages.Add(userPage);
+                        pagesForUser.Pages.Add(userPage);
                     }
                 }
             }
 
             // Return a list of users responsible, along with the page details
             return userPages;
+        }
+
+        private IEnumerable<EntityPermission> GetPermissionsForNodeWithInheritance(IContent entity)
+        {
+            IEnumerable<EntityPermission> entityPermissions;
+            if (_permissions.ContainsKey(entity.Id))
+            {
+                entityPermissions = _permissions[entity.Id];
+            }
+            else
+            {
+                // if no permissions at all, then there will be only one element which will contain a "-"
+                // If only the default permission then there will only be one element which will contain "F" (Browse Node)
+                entityPermissions = _contentService.GetPermissionsForEntity(entity)
+                    .Where(x =>
+                                x.AssignedPermissions.Count() > 1 ||
+                                (x.AssignedPermissions[0] != "-" && x.AssignedPermissions[0] != "F"));
+                _permissions.Add(entity.Id, entityPermissions);
+            }
+
+            while (!entityPermissions.Any())
+            {
+                entity = entity.Parent();
+                if (entity != null)
+                {
+                    entityPermissions = GetPermissionsForNodeWithInheritance(entity);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return entityPermissions;
         }
     }
 }
