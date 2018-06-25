@@ -2,6 +2,19 @@
 
 This project helps you to manage a page expiry policy for content in Umbraco.
 
+## Read the expiry date for a content node
+
+The expiry date for a content node is not normally available to controller code without hitting the database via the Umbraco `ContentService`. This library adds `SaveExpiryDateToExamineEventHandler` which saves a copy of the expiry date in the `ExternalIndex` in Examine, from where it can be retrieved using the following code:
+
+	using Examine;
+	using Escc.Umbraco.Expiry;
+
+    public override ActionResult Index(RenderModel model)
+    {
+		var expiryDateSource = new ExpiryDateFromExamine(model.Content.Id, ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"])
+		var expiryDate = expiryDateSource.ExpiryDate
+	} 
+
 ## Control unpublishing dates for content
 
 The unpublish overrides configuration allows you enforce all content nodes to unpublish after 6 months as a method of enforcing content review. This is enabled when the `UnpublishOverridesSection` is present in `web.config`, even if it is blank. 
