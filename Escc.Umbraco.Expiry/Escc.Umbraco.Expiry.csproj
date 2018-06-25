@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -58,6 +60,12 @@
     </Reference>
     <Reference Include="Escc.BasicAuthentication.WebApi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Escc.BasicAuthentication.WebApi.1.0.2\lib\Escc.BasicAuthentication.WebApi.dll</HintPath>
+    </Reference>
+    <Reference Include="Escc.Umbraco, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Escc.Umbraco.5.0.0-beta\lib\net452\Escc.Umbraco.dll</HintPath>
+    </Reference>
+    <Reference Include="Escc.Umbraco.MediaSync, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Escc.Umbraco.MediaSync.2.0.0\lib\net452\Escc.Umbraco.MediaSync.dll</HintPath>
     </Reference>
     <Reference Include="Examine, Version=0.1.88.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Examine.0.1.88\lib\net45\Examine.dll</HintPath>
@@ -208,6 +216,9 @@
     <Reference Include="umbraco.editorControls, Version=1.0.6527.19574, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UmbracoCms.Core.7.6.12\lib\net45\umbraco.editorControls.dll</HintPath>
     </Reference>
+    <Reference Include="Umbraco.Inception, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Escc.Umbraco.Inception.3.1.3\lib\Umbraco.Inception.dll</HintPath>
+    </Reference>
     <Reference Include="umbraco.MacroEngines, Version=1.0.6527.19575, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UmbracoCms.Core.7.6.12\lib\net45\umbraco.MacroEngines.dll</HintPath>
     </Reference>
@@ -223,6 +234,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExaminePageExpiryService.cs" />
+    <Compile Include="ExpiryDateFromExamine.cs" />
     <Compile Include="ExpiryLogEntry.cs" />
     <Compile Include="IExpiryLogRepository.cs" />
     <Compile Include="IPageExpiryService.cs" />
@@ -243,6 +255,7 @@
     <Compile Include="UmbracoPagesForUser.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="build-nuget.cmd" />
     <None Include="Escc.Umbraco.Expiry.nuspec" />
     <None Include="packages.config" />
@@ -257,4 +270,11 @@
   <PropertyGroup>
     <PostBuildEvent>if "$(ConfigurationName)"=="Release" "$(ProjectDir)build-nuget.cmd" $(ProjectDir)</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\Escc.Umbraco.MediaSync.2.0.0\build\Escc.Umbraco.MediaSync.targets" Condition="Exists('..\packages\Escc.Umbraco.MediaSync.2.0.0\build\Escc.Umbraco.MediaSync.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Escc.Umbraco.MediaSync.2.0.0\build\Escc.Umbraco.MediaSync.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Escc.Umbraco.MediaSync.2.0.0\build\Escc.Umbraco.MediaSync.targets'))" />
+  </Target>
 </Project>

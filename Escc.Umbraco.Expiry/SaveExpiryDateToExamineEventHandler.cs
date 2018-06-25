@@ -18,10 +18,21 @@ namespace Escc.Umbraco.Expiry
     /// <seealso cref="Umbraco.Core.IApplicationEventHandler" />
     public class SaveExpiryDateToExamineEventHandler : IApplicationEventHandler
     {
+        /// <summary>
+        /// ApplicationContext is created and other static objects that require initialization have been setup
+        /// </summary>
+        /// <param name="umbracoApplication"></param>
+        /// <param name="applicationContext"></param>
         public void OnApplicationInitialized(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
         }
 
+        /// <summary>
+        /// Bootup is completed, this allows you to perform any other bootup logic required for the application.
+        /// Resolution is frozen so now they can be used to resolve instances.
+        /// </summary>
+        /// <param name="umbracoApplication"></param>
+        /// <param name="applicationContext"></param>
         public void OnApplicationStarted(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
             ((UmbracoContentIndexer)ExamineManager.Instance.IndexProviderCollection["ExternalIndexer"]).DocumentWriting += SaveExpiryDateToExamine_DocumentWriting;
@@ -50,6 +61,11 @@ namespace Escc.Umbraco.Expiry
             }
         }
 
+        /// <summary>
+        /// All resolvers have been initialized but resolution is not frozen so they can be modified in this method
+        /// </summary>
+        /// <param name="umbracoApplication"></param>
+        /// <param name="applicationContext"></param>
         public void OnApplicationStarting(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
         }
