@@ -216,7 +216,7 @@
     <Reference Include="umbraco.MacroEngines, Version=1.0.6582.14898, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UmbracoCms.Core.7.7.8\lib\net45\umbraco.MacroEngines.dll</HintPath>
     </Reference>
-    <Reference Include="umbraco.providers, Version=1.0.6582.14890, Culture=neutral, processorArchitecture=MSIL">
+     <Reference Include="umbraco.providers, Version=1.0.6582.14890, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UmbracoCms.Core.7.7.8\lib\net45\umbraco.providers.dll</HintPath>
     </Reference>
     <Reference Include="Umbraco.Web.UI, Version=1.0.6582.14899, Culture=neutral, processorArchitecture=MSIL">

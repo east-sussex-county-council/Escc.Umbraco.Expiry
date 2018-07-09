@@ -111,7 +111,8 @@ namespace Escc.Umbraco.Expiry
 
             try
             {
-                var unpublishDate = publishedContent.GetPropertyValue<DateTime?>("unpublishAt");
+
+                var unpublishDate = new ExpiryDateFromExamine(publishedContent.Id, ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"]).ExpiryDate;
                 if (unpublishDate.HasValue && shouldBeNever)
                 {
                     var node = contentService.GetById(publishedContent.Id);
