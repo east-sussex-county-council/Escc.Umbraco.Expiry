@@ -39,3 +39,4 @@ App_Plugins
 !*/Views/web.config
 .vs
 App_Data
+*.orig
