@@ -12,7 +12,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example" } };
             var matcher = new DocumentTypeRuleMatcher(rules, "example", "*");
 
-            var result= matcher.IsMatch();
+            var result= matcher.MatchRule();
 
             Assert.IsTrue(result);
         }
@@ -23,7 +23,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new DocumentTypeExpiryRule() { Alias = "Example" } };
             var matcher = new DocumentTypeRuleMatcher(rules, "example", "*");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsFalse(result);
         }
@@ -34,7 +34,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example", Level = "2" } };
             var matcher = new DocumentTypeRuleMatcher(rules, "example", "2");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsTrue(result);
         }
@@ -45,7 +45,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example", Level = "2" } };
             var matcher = new DocumentTypeRuleMatcher(rules, "example", "3");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsFalse(result);
         }
@@ -56,7 +56,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example", Level = "*" } };
             var matcher = new DocumentTypeRuleMatcher(rules, "example", "2");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsTrue(result);
         }

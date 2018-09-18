@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Escc.Umbraco.Expiry.Configuration;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Escc.Umbraco.Expiry
 {
@@ -22,5 +22,10 @@ namespace Escc.Umbraco.Expiry
         /// Gets rules based on the path portial of the node URL.
         /// </summary>
         IList<PathExpiryRule> PathRules { get; }
+
+        /// <summary>
+        /// Gets the default length of time pages are allowed to be published before they expire.
+        /// </summary>
+        TimeSpan DefaultMaximumExpiry { get; }
     }
 }

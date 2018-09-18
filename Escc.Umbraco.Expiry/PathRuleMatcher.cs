@@ -34,16 +34,17 @@ namespace Escc.Umbraco.Expiry
         /// Check for and process an override based on the page Url
         /// </summary>
         /// <returns>
-        /// True if an override exists
+        /// Returns the matched rule, or <c>null</c> if no rule is found
         /// </returns>
-        public bool IsMatch()
+        public IExpiryRule MatchRule()
         {
-            // If parameters were not passed, return false (no override)
-            if (_expiryRules == null) return false;
-            if (string.IsNullOrEmpty(_pagePath)) return false;
+            // If parameters were not passed, return no override
+            if (_expiryRules == null) return null;
+            if (string.IsNullOrEmpty(_pagePath)) return null;
 
             // Look for the specific Url in the overrides list
-            if (_expiryRules.Any(n => n.Path == _pagePath)) return true;
+            var matchedRule = _expiryRules.FirstOrDefault(n => n.Path == _pagePath);
+            if (matchedRule != null) return matchedRule;
 
             // ================================================================
             // pagePath may be a child of an override Url
@@ -55,19 +56,19 @@ namespace Escc.Umbraco.Expiry
             //
             // Second item is the most specific, find it by ordering the Paths by the number of '/' characters in the string
             // ================================================================
-            var entry = _expiryRules.Where(n => _pagePath.StartsWith(n.Path)).OrderByDescending(c => c.Path.Count(f => f == '/')).FirstOrDefault();
+            matchedRule = _expiryRules.Where(n => _pagePath.StartsWith(n.Path)).OrderByDescending(c => c.Path.Count(f => f == '/')).FirstOrDefault();
 
             // No override(s) found
-            if (entry == null) return false;
+            if (matchedRule == null) return null;
 
-            // The override applies to all children too, so return true
-            if (entry.Children == "*") return true;
+            // The override applies to all children too, so return the rule
+            if (matchedRule.Children == "*") return matchedRule;
 
-            // All other tests failed, so return false (no override)
-            return false;
+            // All other tests failed, so return no override
+            return null;
         }
 
-        public string NormalisePath(string path)
+        private string NormalisePath(string path)
         {
             return path.TrimEnd('/') + "/";
         }

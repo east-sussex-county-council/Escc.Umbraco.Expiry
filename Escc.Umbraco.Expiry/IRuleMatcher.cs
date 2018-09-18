@@ -9,8 +9,8 @@
         /// Determines whether any of the rules in this set match the content node
         /// </summary>
         /// <returns>
-        ///   <c>true</c> if a rule matches; otherwise, <c>false</c>.
+        /// Returns the matched rule, or <c>null</c> if no rule is found
         /// </returns>
-        bool IsMatch();
+        IExpiryRule MatchRule();
     }
 }

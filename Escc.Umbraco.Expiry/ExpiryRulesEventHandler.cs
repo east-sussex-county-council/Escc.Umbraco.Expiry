@@ -37,11 +37,7 @@ namespace Escc.Umbraco.Expiry
                 if (expiryRuleProvider.IsEnabled)
                 {
                     // Get default time period. Expiry time will be the same as the node creation time.
-                    var maxDate = DateTime.Now.AddMonths(6);
-
-                    // Convert the date time to a string for event messages
-                    var dateString = maxDate.ToString("dd MMMM yyyy");
-                    dateString += maxDate.ToString(" h:mm:sstt").ToLower();
+                    var defaultMaximumDate = DateTime.Now.Add(expiryRuleProvider.DefaultMaximumExpiry);
 
                     // Create the rule evaluator
                     var ruleEvaluator = new ExpiryRuleEvaluator();
@@ -60,29 +56,35 @@ namespace Escc.Umbraco.Expiry
                         if (entity.ExpireDate.HasValue)
                         {
                             // Check for override
-                            if (ruleEvaluator.CheckOverride(expiryRuleProvider, entity))
+                            var expiryRule = ruleEvaluator.CheckOverride(expiryRuleProvider, entity);
+
+                            // Date not allowed because there is an override with no date
+                            if (expiryRule != null && !expiryRule.MaximumExpiry.HasValue)
                             {
-                                // Date not allowed because there is an override
                                 e.CancelOperation(new EventMessage("Publish Failed", "You cannot enter an 'Unpublish at' date for this page", EventMessageType.Error));
                             }
 
-                            // Date cannot be more than 6 months in the future
-                            else if (entity.ExpireDate > maxDate)
+                            // Date cannot be more than a set timespan into the future
+                            else
                             {
-                                // Default the date to the maximum allowed and continue publishing.
-                                entity.ExpireDate = maxDate;
-                                e.Messages.Add(new EventMessage("Warning", "The 'Unpublish at' date cannot be more than 6 months in the future. The date has been set to: " + dateString + ". You can refresh the page to see the new date.", EventMessageType.Warning));
+                                var maximumDate = expiryRule != null && expiryRule.MaximumExpiry.HasValue ? DateTime.Now.Add(expiryRule.MaximumExpiry.Value) : defaultMaximumDate;
+                                if (entity.ExpireDate > maximumDate)
+                                {
+                                    // Default the date to the maximum allowed and continue publishing.
+                                    entity.ExpireDate = maximumDate;
+                                    e.Messages.Add(new EventMessage("Warning", "The 'Unpublish at' date is too far into the future. The date has been set to: " + DisplayDate(defaultMaximumDate) + ". You can refresh the page to see the new date.", EventMessageType.Warning));
+                                }
                             }
                         }
                         else
                         {
                             // Check for no override
-                            if (!ruleEvaluator.CheckOverride(expiryRuleProvider, entity))
+                            if (ruleEvaluator.CheckOverride(expiryRuleProvider, entity) == null)
                             {
                                 // Date is required as no override exists
                                 // As no date has been provided and there is no override, default the date to the maximum allowed and continue publishing.
-                                entity.ExpireDate = maxDate;
-                                e.Messages.Add(new EventMessage("Warning", "The 'Unpublish at' date is a required field. The date has been set to " + dateString + ". You can refresh the page to see the new date.", EventMessageType.Warning));
+                                entity.ExpireDate = defaultMaximumDate;
+                                e.Messages.Add(new EventMessage("Warning", "The 'Unpublish at' date is a required field. The date has been set to " + DisplayDate(defaultMaximumDate) + ". You can refresh the page to see the new date.", EventMessageType.Warning));
                             }
 
                             // No date is OK because there is an override
@@ -95,6 +97,11 @@ namespace Escc.Umbraco.Expiry
                 LogHelper.Error<ExpiryRulesEventHandler>("Error checking page expiry date.", ex);
                 e.CancelOperation(new EventMessage("Publish Failed", ex.Message, EventMessageType.Error));
             }
+        }
+
+        private static string DisplayDate(DateTime defaultMaximumDate)
+        {
+            return defaultMaximumDate.ToString("dd MMMM yyyy") + defaultMaximumDate.ToString(" h.mmtt").ToLower();
         }
     }
 }

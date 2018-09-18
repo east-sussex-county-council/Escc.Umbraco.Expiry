@@ -1,4 +1,6 @@
+using System;
 using System.Configuration;
+using System.Globalization;
 
 namespace Escc.Umbraco.Expiry.Configuration
 {
@@ -17,6 +19,20 @@ namespace Escc.Umbraco.Expiry.Configuration
         {
             get { return (bool)this["enabled"]; }
             set { this["enabled"] = value; }
+        }
+
+        [ConfigurationProperty("defaultExpiryDays", DefaultValue = 0, IsRequired = false)]
+        public int MaximumExpiryDays
+        {
+            get { return Int32.Parse(this["defaultExpiryDays"].ToString(), CultureInfo.InvariantCulture); }
+            set { this["defaultExpiryDays"] = value; }
+        }
+
+        [ConfigurationProperty("defaultExpiryMonths", DefaultValue = 6, IsRequired = false)]
+        public int MaximumExpiryMonths
+        {
+            get { return Int32.Parse(this["defaultExpiryMonths"].ToString(), CultureInfo.InvariantCulture); }
+            set { this["defaultExpiryMonths"] = value; }
         }
 
         [ConfigurationProperty(ContentTypesCollectionName)]

@@ -16,7 +16,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new PathExpiryRule() { Path = "/example/" } };
             var matcher = new PathRuleMatcher(rules, "/example");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsTrue(result);
         }
@@ -27,7 +27,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new PathExpiryRule() { Path = "/example" } };
             var matcher = new PathRuleMatcher(rules, "/example");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsTrue(result);
         }
@@ -38,7 +38,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new PathExpiryRule() { Path = "/example/" } };
             var matcher = new PathRuleMatcher(rules, "/example/");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsTrue(result);
         }
@@ -49,7 +49,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new PathExpiryRule() { Path = "/example" } };
             var matcher = new PathRuleMatcher(rules, "/example/");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsTrue(result);
         }
@@ -60,7 +60,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new PathExpiryRule() { Path = "/example/", Children = "*" } };
             var matcher = new PathRuleMatcher(rules, "/example/child/");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsTrue(result);
         }
@@ -71,7 +71,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new PathExpiryRule() { Path = "/example/", Children = "" } };
             var matcher = new PathRuleMatcher(rules, "/example/child/");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsFalse(result);
         }
@@ -82,7 +82,7 @@ namespace Escc.Umbraco.Expiry.Tests
             var rules = new[] { new PathExpiryRule() { Path = "/example/" } };
             var matcher = new PathRuleMatcher(rules, "/different/");
 
-            var result = matcher.IsMatch();
+            var result = matcher.MatchRule();
 
             Assert.IsFalse(result);
         }

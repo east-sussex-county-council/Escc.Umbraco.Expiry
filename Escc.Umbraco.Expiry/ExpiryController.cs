@@ -107,22 +107,31 @@ namespace Escc.Umbraco.Expiry
         private void SetOrRemoveUnpublishDate(IPublishedContent publishedContent)
         {
             var contentService = ApplicationContext.Current.Services.ContentService;
-            var shouldBeNever = new ExpiryRuleEvaluator().CheckOverride(new ExpiryRulesFromConfig(), publishedContent);
+            var expiryRuleProvider = new ExpiryRulesFromConfig();
+            var expiryRule = new ExpiryRuleEvaluator().CheckOverride(expiryRuleProvider, publishedContent);
 
             try
             {
 
                 var unpublishDate = new ExpiryDateFromExamine(publishedContent.Id, ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"]).ExpiryDate;
-                if (unpublishDate.HasValue && shouldBeNever)
+                if (unpublishDate.HasValue && expiryRule != null && !expiryRule.MaximumExpiry.HasValue)
                 {
+                    // Page should never expire
                     var node = contentService.GetById(publishedContent.Id);
                     node.ExpireDate = null;
                     contentService.SaveAndPublishWithStatus(node);
                 }
-                else if (!unpublishDate.HasValue && !shouldBeNever)
+                else if (!unpublishDate.HasValue && (expiryRule == null || expiryRule.MaximumExpiry.HasValue))
                 {
                     var node = contentService.GetById(publishedContent.Id);
-                    node.ExpireDate = DateTime.Now.AddMonths(6);
+                    if (expiryRule != null && expiryRule.MaximumExpiry.HasValue)
+                    {
+                        node.ExpireDate = DateTime.Now.Add(expiryRule.MaximumExpiry.Value);
+                    }
+                    else
+                    {
+                        node.ExpireDate = DateTime.Now.Add(expiryRuleProvider.DefaultMaximumExpiry);
+                    }
                     contentService.SaveAndPublishWithStatus(node);
                 }
             }

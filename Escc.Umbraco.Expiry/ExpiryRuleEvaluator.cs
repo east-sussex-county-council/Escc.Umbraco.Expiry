@@ -26,18 +26,20 @@ namespace Escc.Umbraco.Expiry
         /// <returns>
         /// True if an override exists
         /// </returns>
-        public bool CheckOverride(IExpiryRuleProvider expiryRules, IContent contentItem)
+        public IExpiryRule CheckOverride(IExpiryRuleProvider expiryRules, IContent contentItem)
         {
-            if (expiryRules == null) return false;
-            if (contentItem == null) return false;
+            if (expiryRules == null) return null;
+            if (contentItem == null) return null;
 
             // Check for a ContentType override
-            if (new DocumentTypeRuleMatcher(expiryRules.DocumentTypeRules, contentItem.ContentType.Alias, contentItem.Level.ToString()).IsMatch()) return true;
+            IExpiryRule matchedRule = new DocumentTypeRuleMatcher(expiryRules.DocumentTypeRules, contentItem.ContentType.Alias, contentItem.Level.ToString()).MatchRule();
+            if (matchedRule != null) return matchedRule;
 
             // Check for an override based on the Url
-            if (new PathRuleMatcher(expiryRules.PathRules, GetNodeUrl(contentItem).ToLower()).IsMatch()) return true;
+            matchedRule = new PathRuleMatcher(expiryRules.PathRules, GetNodeUrl(contentItem).ToLower()).MatchRule();
+            if (matchedRule != null) return matchedRule;
 
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -48,10 +50,10 @@ namespace Escc.Umbraco.Expiry
         /// <returns>
         /// True if an override exists
         /// </returns>
-        public bool CheckOverride(IExpiryRuleProvider expiryRules, ContentItemDisplay contentItem)
+        public IExpiryRule CheckOverride(IExpiryRuleProvider expiryRules, ContentItemDisplay contentItem)
         {
-            if (expiryRules == null) return false;
-            if (contentItem == null) return false;
+            if (expiryRules == null) return null;
+            if (contentItem == null) return null;
 
             var contentService = ApplicationContext.Current.Services.ContentService;
             var content = contentService.GetById(contentItem.Key);
@@ -67,18 +69,20 @@ namespace Escc.Umbraco.Expiry
         /// <returns>
         /// True if an override exists
         /// </returns>
-        public bool CheckOverride(IExpiryRuleProvider expiryRules, IPublishedContent contentItem)
+        public IExpiryRule CheckOverride(IExpiryRuleProvider expiryRules, IPublishedContent contentItem)
         {
-            if (expiryRules == null) return false;
-            if (contentItem == null) return false;
+            if (expiryRules == null) return null;
+            if (contentItem == null) return null;
 
             // Check for a ContentType override
-            if (new DocumentTypeRuleMatcher(expiryRules.DocumentTypeRules, contentItem.ContentType.Alias, contentItem.Level.ToString()).IsMatch()) return true;
+            IExpiryRule matchedRule = new DocumentTypeRuleMatcher(expiryRules.DocumentTypeRules, contentItem.ContentType.Alias, contentItem.Level.ToString()).MatchRule();
+            if (matchedRule != null) return matchedRule;
 
             // Check for an override based on the Url
-            if (new PathRuleMatcher(expiryRules.PathRules, contentItem.Url.ToLower()).IsMatch()) return true;
+            matchedRule = new PathRuleMatcher(expiryRules.PathRules, contentItem.Url.ToLower()).MatchRule();
+            if (matchedRule != null) return matchedRule;
 
-            return false;
+            return null;
         }
 
         /// <summary>

@@ -33,30 +33,30 @@ namespace Escc.Umbraco.Expiry
         /// Check for and process an override based on the page document type
         /// </summary>
         /// <returns>
-        /// True if an override exists
+        /// Returns the matched rule, or <c>null</c> if no rule is found
         /// </returns>
-        public bool IsMatch()
+        public IExpiryRule MatchRule()
         {
             // If a document type alias was not passed, return false (no override)
-            if (string.IsNullOrEmpty(_documentTypeAlias)) return false;
+            if (string.IsNullOrEmpty(_documentTypeAlias)) return null;
 
             // Look for the template name in the overrides list
             var documentTypeRule = _expiryRules.FirstOrDefault(n => n.Alias == _documentTypeAlias);
 
-            // If document type not found then return false (no override)
-            if (documentTypeRule == null) return false;
+            // If document type not found then return null (no override)
+            if (documentTypeRule == null) return null;
 
             // If a specific level was not provided, then the override applies at any level
-            if (string.IsNullOrEmpty(_levelInContentTree)) return true;
+            if (string.IsNullOrEmpty(_levelInContentTree)) return documentTypeRule;
 
             // If the document type override applies at a specific level
             if (!String.IsNullOrEmpty(documentTypeRule.Level) && documentTypeRule.Level != "*")
             {
-                return documentTypeRule.Level == _levelInContentTree;
+                return documentTypeRule.Level == _levelInContentTree ? documentTypeRule : null;
             }
 
             // Document type alias found and applies at all levels
-            return true;
+            return documentTypeRule;
         }
     }
 }

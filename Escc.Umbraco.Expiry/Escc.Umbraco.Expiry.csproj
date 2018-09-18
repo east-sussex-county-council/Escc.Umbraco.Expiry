@@ -58,11 +58,11 @@
     <Reference Include="CookComputing.XmlRpcV2, Version=2.5.0.0, Culture=neutral, PublicKeyToken=a7d6e17aa302004d, processorArchitecture=MSIL">
       <HintPath>..\packages\xmlrpcnet.2.5.0\lib\net20\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
+    <Reference Include="Escc.Umbraco, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Escc.Umbraco.5.0.0\lib\net452\Escc.Umbraco.dll</HintPath>
+    </Reference>
     <Reference Include="Examine, Version=0.1.89.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Examine.0.1.89\lib\net45\Examine.dll</HintPath>
-    </Reference>
-    <Reference Include="Escc.Umbraco, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Escc.Umbraco.5.0.0-beta\lib\net452\Escc.Umbraco.dll</HintPath>
     </Reference>
     <Reference Include="Escc.Umbraco.MediaSync, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Escc.Umbraco.MediaSync.2.0.0\lib\net452\Escc.Umbraco.MediaSync.dll</HintPath>
@@ -234,6 +234,7 @@
     <Compile Include="ExpiryLogEntry.cs" />
     <Compile Include="ExpiryRuleEvaluator.cs" />
     <Compile Include="IExpiryLogRepository.cs" />
+    <Compile Include="IExpiryRule.cs" />
     <Compile Include="IExpiryRuleProvider.cs" />
     <Compile Include="IPageExpiryService.cs" />
     <Compile Include="IRuleMatcher.cs" />
