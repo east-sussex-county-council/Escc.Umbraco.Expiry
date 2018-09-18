@@ -216,7 +216,7 @@
     <Reference Include="umbraco.MacroEngines, Version=1.0.6582.14898, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UmbracoCms.Core.7.7.8\lib\net45\umbraco.MacroEngines.dll</HintPath>
     </Reference>
-     <Reference Include="umbraco.providers, Version=1.0.6582.14890, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="umbraco.providers, Version=1.0.6582.14890, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UmbracoCms.Core.7.7.8\lib\net45\umbraco.providers.dll</HintPath>
     </Reference>
     <Reference Include="Umbraco.Web.UI, Version=1.0.6582.14899, Culture=neutral, processorArchitecture=MSIL">
@@ -227,18 +227,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DocumentTypeExpiryRule.cs" />
+    <Compile Include="DocumentTypeRuleMatcher.cs" />
     <Compile Include="ExaminePageExpiryService.cs" />
     <Compile Include="ExpiryDateFromExamine.cs" />
     <Compile Include="ExpiryLogEntry.cs" />
+    <Compile Include="ExpiryRuleEvaluator.cs" />
     <Compile Include="IExpiryLogRepository.cs" />
+    <Compile Include="IExpiryRuleProvider.cs" />
     <Compile Include="IPageExpiryService.cs" />
+    <Compile Include="IRuleMatcher.cs" />
+    <Compile Include="PathExpiryRule.cs" />
+    <Compile Include="PathRuleMatcher.cs" />
     <Compile Include="PetaPoco.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaveExpiryDateToExamineEventHandler.cs" />
     <Compile Include="SqlServerExpiryLogRepository.cs" />
     <Compile Include="UmbracoUser.cs" />
     <Compile Include="ExpiryRulesEventHandler.cs" />
-    <Compile Include="ExpiryRules.cs" />
+    <Compile Include="ExpiryRulesFromConfig.cs" />
     <Compile Include="ExpiryController.cs" />
     <Compile Include="Configuration\UnpublishOverridesContentTypeElement.cs" />
     <Compile Include="Configuration\UnpublishOverridesContentTypesCollection.cs" />

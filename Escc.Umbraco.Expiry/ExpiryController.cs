@@ -107,7 +107,7 @@ namespace Escc.Umbraco.Expiry
         private void SetOrRemoveUnpublishDate(IPublishedContent publishedContent)
         {
             var contentService = ApplicationContext.Current.Services.ContentService;
-            var shouldBeNever = ExpiryRules.CheckOverride(publishedContent);
+            var shouldBeNever = new ExpiryRuleEvaluator().CheckOverride(new ExpiryRulesFromConfig(), publishedContent);
 
             try
             {
