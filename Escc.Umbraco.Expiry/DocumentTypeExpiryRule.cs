@@ -17,9 +17,9 @@ namespace Escc.Umbraco.Expiry
         public string Alias { get; set; }
 
         /// <summary>
-        /// Gets or sets the level in the content tree at which the rule should be applied. * means all levels.
+        /// Gets or sets the level in the content tree at which the rule should be applied. <c>null</c> means all levels.
         /// </summary>
-        public string Level { get; set; }
+        public int? Level { get; set; }
 
         /// <summary>
         /// Gets or sets the length of time pages of this document type are allowed to be published before they expire.

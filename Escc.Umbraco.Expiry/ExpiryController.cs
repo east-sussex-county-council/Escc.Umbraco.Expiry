@@ -108,7 +108,7 @@ namespace Escc.Umbraco.Expiry
         {
             var contentService = ApplicationContext.Current.Services.ContentService;
             var expiryRuleProvider = new ExpiryRulesFromUmbraco(UmbracoContext.ContentCache);
-            var expiryRule = new ExpiryRuleEvaluator().CheckOverride(expiryRuleProvider, publishedContent);
+            var expiryRule = new ExpiryRuleEvaluator().MatchExpiryRules(new DocumentTypeRuleMatcher(expiryRuleProvider.DocumentTypeRules), new PathRuleMatcher(expiryRuleProvider.PathRules), publishedContent);
 
             try
             {

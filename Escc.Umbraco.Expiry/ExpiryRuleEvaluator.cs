@@ -1,41 +1,118 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Web;
-using System.Web.Hosting;
-using Umbraco.Core;
 using Umbraco.Core.Models;
-using Umbraco.Web;
-using Umbraco.Web.Models.ContentEditing;
-using Umbraco.Web.Security;
 
 namespace Escc.Umbraco.Expiry
 {
     /// <summary>
     /// Checks if any expiry rule of any type applies to a node
     /// </summary>
-    class ExpiryRuleEvaluator
+    public class ExpiryRuleEvaluator
     {
+        public ExpiryRuleResult ApplyExpiryRules(DateTime timePublished, TimeSpan? defaultMaximumExpiry, IDocumentTypeRuleMatcher documentTypeMatcher, IPathRuleMatcher pathMatcher, IContent contentNode, INodeUrlBuilder urlBuilder)
+        {
+            if (documentTypeMatcher == null)
+            {
+                throw new ArgumentNullException(nameof(documentTypeMatcher));
+            }
+
+            if (pathMatcher == null)
+            {
+                throw new ArgumentNullException(nameof(pathMatcher));
+            }
+
+            if (contentNode == null)
+            {
+                throw new ArgumentNullException(nameof(contentNode));
+            }
+
+            if (urlBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(urlBuilder));
+            }
+            // Check for expiry rule
+            var expiryRule = MatchExpiryRules(documentTypeMatcher, pathMatcher, contentNode, urlBuilder);
+
+            // There is an rule with no date, meaning it must be set to never, so disallow a date is one is set
+            if (expiryRule != null && !expiryRule.MaximumExpiry.HasValue && contentNode.ExpireDate.HasValue)
+            {
+                return new ExpiryRuleResult() { CancellationMessage = "You cannot enter an 'Unpublish at' date for this page" };
+            }
+
+            // Date cannot be more than a set timespan into the future
+            DateTime? maximumDate = null;
+            if (expiryRule != null && expiryRule.MaximumExpiry.HasValue)
+            {
+                maximumDate = timePublished.Add(expiryRule.MaximumExpiry.Value);
+            }
+            else if (defaultMaximumExpiry.HasValue)
+            {
+                maximumDate = timePublished.Add(defaultMaximumExpiry.Value);
+            }
+
+            if (maximumDate.HasValue && !contentNode.ExpireDate.HasValue)
+            {
+                // Default the date to the maximum allowed and continue publishing.
+                return new ExpiryRuleResult() {
+                    ExpireDate = maximumDate,
+                    ExpireDateChangedMessage = "The 'Unpublish at' date is a required field. The date has been set to " + DisplayDate(maximumDate.Value) + ". You can refresh the page to see the new date."
+                };
+            }
+            else if (maximumDate.HasValue && contentNode.ExpireDate > maximumDate)
+            {
+                // Default the date to the maximum allowed and continue publishing.
+                return new ExpiryRuleResult() {
+                    ExpireDate = maximumDate,
+                    ExpireDateChangedMessage = "The 'Unpublish at' date is too far into the future. The date has been set to: " + DisplayDate(maximumDate.Value) + ". You can refresh the page to see the new date."
+                };
+            }
+
+            // Current setting is OK - no change
+            return new ExpiryRuleResult() { ExpireDate = contentNode.ExpireDate };
+        }
+
+        private static string DisplayDate(DateTime defaultMaximumDate)
+        {
+            return defaultMaximumDate.ToString("dd MMMM yyyy") + defaultMaximumDate.ToString(" h.mmtt").ToLower();
+        }
+
         /// <summary>
         /// Check if an override exists
         /// </summary>
-        /// <param name="expiryRules">The expiry rules.</param>
+        /// <param name="documentTypeMatcher">The document type rule matcher.</param>
+        /// <param name="pathMatcher">The path matcher.</param>
         /// <param name="contentItem">Content Item to check</param>
         /// <returns>
         /// True if an override exists
         /// </returns>
-        public IExpiryRule CheckOverride(IExpiryRuleProvider expiryRules, IContent contentItem)
+        /// <exception cref="ArgumentNullException">
+        /// documentTypeMatcher
+        /// or
+        /// pathMatcher
+        /// </exception>
+        public IExpiryRule MatchExpiryRules(IDocumentTypeRuleMatcher documentTypeMatcher, IPathRuleMatcher pathMatcher, IContent contentItem, INodeUrlBuilder urlBuilder)
         {
-            if (expiryRules == null) return null;
+            if (documentTypeMatcher == null)
+            {
+                throw new ArgumentNullException(nameof(documentTypeMatcher));
+            }
+
+            if (pathMatcher == null)
+            {
+                throw new ArgumentNullException(nameof(pathMatcher));
+            }
+
             if (contentItem == null) return null;
+            if (urlBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(urlBuilder));
+            }
 
             // Check for a ContentType override
-            IExpiryRule matchedRule = new DocumentTypeRuleMatcher(expiryRules.DocumentTypeRules, contentItem.ContentType.Alias, contentItem.Level.ToString()).MatchRule();
+            IExpiryRule matchedRule = documentTypeMatcher.MatchRule(contentItem.ContentType.Alias, contentItem.Level);
             if (matchedRule != null) return matchedRule;
 
             // Check for an override based on the Url
-            matchedRule = new PathRuleMatcher(expiryRules.PathRules, GetNodeUrl(contentItem).ToLower()).MatchRule();
+            matchedRule = pathMatcher.MatchRule(urlBuilder.GetNodeUrl(contentItem).ToLower());
             if (matchedRule != null) return matchedRule;
 
             return null;
@@ -44,85 +121,40 @@ namespace Escc.Umbraco.Expiry
         /// <summary>
         /// Used where IContent is not available
         /// </summary>
-        /// <param name="expiryRules">The expiry rules.</param>
+        /// <param name="documentTypeMatcher">The document type matcher.</param>
+        /// <param name="pathMatcher">The path matcher.</param>
         /// <param name="contentItem">Content Item to Check</param>
         /// <returns>
         /// True if an override exists
         /// </returns>
-        public IExpiryRule CheckOverride(IExpiryRuleProvider expiryRules, ContentItemDisplay contentItem)
+        /// <exception cref="ArgumentNullException">
+        /// documentTypeMatcher
+        /// or
+        /// pathMatcher
+        /// </exception>
+        public IExpiryRule MatchExpiryRules(IDocumentTypeRuleMatcher documentTypeMatcher, IPathRuleMatcher pathMatcher, IPublishedContent contentItem)
         {
-            if (expiryRules == null) return null;
-            if (contentItem == null) return null;
+            if (documentTypeMatcher == null)
+            {
+                throw new ArgumentNullException(nameof(documentTypeMatcher));
+            }
 
-            var contentService = ApplicationContext.Current.Services.ContentService;
-            var content = contentService.GetById(contentItem.Key);
+            if (pathMatcher == null)
+            {
+                throw new ArgumentNullException(nameof(pathMatcher));
+            }
 
-            return CheckOverride(expiryRules, content);
-        }
-
-        /// <summary>
-        /// Used where IContent is not available
-        /// </summary>
-        /// <param name="expiryRules">The expiry rules.</param>
-        /// <param name="contentItem">Content Item to Check</param>
-        /// <returns>
-        /// True if an override exists
-        /// </returns>
-        public IExpiryRule CheckOverride(IExpiryRuleProvider expiryRules, IPublishedContent contentItem)
-        {
-            if (expiryRules == null) return null;
             if (contentItem == null) return null;
 
             // Check for a ContentType override
-            IExpiryRule matchedRule = new DocumentTypeRuleMatcher(expiryRules.DocumentTypeRules, contentItem.ContentType.Alias, contentItem.Level.ToString()).MatchRule();
+            IExpiryRule matchedRule = documentTypeMatcher.MatchRule(contentItem.ContentType.Alias, contentItem.Level);
             if (matchedRule != null) return matchedRule;
 
             // Check for an override based on the Url
-            matchedRule = new PathRuleMatcher(expiryRules.PathRules, contentItem.Url.ToLower()).MatchRule();
+            matchedRule = pathMatcher.MatchRule(contentItem.Url.ToLower());
             if (matchedRule != null) return matchedRule;
 
             return null;
-        }
-
-        /// <summary>
-        /// Get or construct the node Url
-        /// </summary>
-        /// <param name="node">Node to process</param>
-        /// <returns>Node Url</returns>
-        private static string GetNodeUrl(IContent node)
-        {
-            // Make sure we have a current Umbraco Context
-            if (UmbracoContext.Current == null)
-            {
-                var dummyContext = new HttpContextWrapper(new HttpContext(new SimpleWorkerRequest("/", string.Empty, new StringWriter())));
-                UmbracoContext.EnsureContext(
-                    dummyContext,
-                    ApplicationContext.Current,
-                    new WebSecurity(dummyContext, ApplicationContext.Current),
-                    false);
-            }
-            var helper = new UmbracoHelper(UmbracoContext.Current);
-
-            var entityUrl = helper.NiceUrl(node.Id);
-
-            if (!string.IsNullOrEmpty(entityUrl) && entityUrl != "#") return entityUrl;
-
-            // Just need the Url of the parent node...
-            entityUrl = helper.Url(node.ParentId);
-            if (entityUrl == "#") entityUrl = string.Empty;
-            if (!entityUrl.EndsWith("/")) entityUrl += "/";
-
-            // Then add the current node name
-            var nodeName = node.Name;
-            if (node.HasProperty("umbracoUrlName") && !string.IsNullOrEmpty(node.GetValue<string>("umbracoUrlName")))
-            {
-                nodeName = node.GetValue<string>("umbracoUrlName");
-            }
-
-            nodeName = umbraco.cms.helpers.url.FormatUrl(nodeName);
-            entityUrl = string.Format("{0}{1}/", entityUrl, nodeName);
-
-            return entityUrl;
         }
     }
 }

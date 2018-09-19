@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Umbraco.Core.Models;
 using Umbraco.Web;
@@ -64,7 +65,12 @@ namespace Escc.Umbraco.Expiry
                 var documentTypes = documentTypeRule.GetPropertyValue<IEnumerable<string>>("documentTypes");
                 foreach (var documentType in documentTypes)
                 {
-                    var rule = new DocumentTypeExpiryRule() { Alias = documentType, Level = documentTypeRule.GetPropertyValue<string>("level") };
+                    int? level = null;
+                    if (!String.IsNullOrEmpty(documentTypeRule.GetPropertyValue<string>("level")))
+                    {
+                        level = Int32.Parse(documentTypeRule.GetPropertyValue<string>("level"), CultureInfo.CurrentCulture);
+                    }
+                    var rule = new DocumentTypeExpiryRule() { Alias = documentType, Level = level };
 
                     if (DocumentTypeRules.FirstOrDefault(alreadyAdded => alreadyAdded.Alias == rule.Alias && alreadyAdded.Level == rule.Level) == null)
                     {
@@ -101,7 +107,7 @@ namespace Escc.Umbraco.Expiry
                 {
                     var rule = new PathExpiryRule() { Path = page.Url, ApplyToDescendantPages = pageRule.GetPropertyValue<bool>("applyToDescendantPages") };
 
-                    if (PathRules.FirstOrDefault(alreadyAddded => alreadyAddded.Path == rule.Path && alreadyAddded.ApplyToDescendantPages == rule.ApplyToDescendantPages) == null)
+                    if (PathRules.FirstOrDefault(alreadyAdded => alreadyAdded.Path == rule.Path && alreadyAdded.ApplyToDescendantPages == rule.ApplyToDescendantPages) == null)
                     {
                         var months = pageRule.GetPropertyValue<int>("months");
                         var days = pageRule.GetPropertyValue<int>("days");

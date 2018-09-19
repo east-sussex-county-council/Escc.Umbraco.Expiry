@@ -236,11 +236,15 @@
     <Compile Include="ExpiryDateFromExamine.cs" />
     <Compile Include="ExpiryLogEntry.cs" />
     <Compile Include="ExpiryRuleEvaluator.cs" />
+    <Compile Include="ExpiryRuleResult.cs" />
+    <Compile Include="IDocumentTypeRuleMatcher.cs" />
     <Compile Include="IExpiryLogRepository.cs" />
     <Compile Include="IExpiryRule.cs" />
     <Compile Include="IExpiryRuleProvider.cs" />
+    <Compile Include="INodeUrlBuilder.cs" />
     <Compile Include="IPageExpiryService.cs" />
-    <Compile Include="IRuleMatcher.cs" />
+    <Compile Include="IPathRuleMatcher.cs" />
+    <Compile Include="NodeUrlBuilder.cs" />
     <Compile Include="PathExpiryRule.cs" />
     <Compile Include="PathRuleMatcher.cs" />
     <Compile Include="PetaPoco.cs" />
@@ -261,8 +265,6 @@
     <None Include="build-nuget.cmd" />
     <None Include="Escc.Umbraco.Expiry.nuspec" />
     <None Include="packages.config" />
-    <None Include="Web.config.install.xdt" />
-    <None Include="Web.config.uninstall.xdt" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Plugins\DocumentTypePicker\DocumentTypePickerController.js" />

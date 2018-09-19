@@ -10,9 +10,9 @@ namespace Escc.Umbraco.Expiry.Tests
         public void AliasIsMatched()
         {
             var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example" } };
-            var matcher = new DocumentTypeRuleMatcher(rules, "example", "*");
+            var matcher = new DocumentTypeRuleMatcher(rules);
 
-            var result= matcher.MatchRule();
+            var result= matcher.MatchRule("example", null);
 
             Assert.IsNotNull(result);
         }
@@ -21,9 +21,9 @@ namespace Escc.Umbraco.Expiry.Tests
         public void AliasMatchIsCaseSensitive()
         {
             var rules = new[] { new DocumentTypeExpiryRule() { Alias = "Example" } };
-            var matcher = new DocumentTypeRuleMatcher(rules, "example", "*");
+            var matcher = new DocumentTypeRuleMatcher(rules);
 
-            var result = matcher.MatchRule();
+            var result = matcher.MatchRule("example", null);
 
             Assert.IsNull(result);
         }
@@ -31,10 +31,10 @@ namespace Escc.Umbraco.Expiry.Tests
         [Test]
         public void LevelIsMatched()
         {
-            var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example", Level = "2" } };
-            var matcher = new DocumentTypeRuleMatcher(rules, "example", "2");
+            var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example", Level = 2 } };
+            var matcher = new DocumentTypeRuleMatcher(rules);
 
-            var result = matcher.MatchRule();
+            var result = matcher.MatchRule("example", 2);
 
             Assert.IsNotNull(result);
         }
@@ -42,10 +42,10 @@ namespace Escc.Umbraco.Expiry.Tests
         [Test]
         public void DifferentLevelIsNotMatched()
         {
-            var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example", Level = "2" } };
-            var matcher = new DocumentTypeRuleMatcher(rules, "example", "3");
+            var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example", Level = 2 } };
+            var matcher = new DocumentTypeRuleMatcher(rules);
 
-            var result = matcher.MatchRule();
+            var result = matcher.MatchRule("example", 3);
 
             Assert.IsNull(result);
         }
@@ -53,10 +53,10 @@ namespace Escc.Umbraco.Expiry.Tests
         [Test]
         public void WildcardLevelIsMatched()
         {
-            var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example", Level = "*" } };
-            var matcher = new DocumentTypeRuleMatcher(rules, "example", "2");
+            var rules = new[] { new DocumentTypeExpiryRule() { Alias = "example", Level = null } };
+            var matcher = new DocumentTypeRuleMatcher(rules);
 
-            var result = matcher.MatchRule();
+            var result = matcher.MatchRule("example", 2);
 
             Assert.IsNotNull(result);
         }
