@@ -17,57 +17,45 @@ The expiry date for a content node is not normally available to controller code 
 
 ## Control unpublishing dates for content
 
-The unpublish overrides configuration allows you enforce all content nodes to unpublish after 6 months as a method of enforcing content review. This is enabled when the `UnpublishOverridesSection` is present in `web.config`, even if it is blank. 
+Create document types in Umbraco matching the following specification to allow editors to configure limits on the expiry dates that can be set for content.
 
-You can prevent content nodes from having an unpublish date based on either their document type alias or URL. This is useful when you want specific content for your site never to disappear, like a home page.
+1. Create a document type (without a template) called 'Expiry rules' with an alias of `expiryRules`. Add three properties on a tab called 'Default expiry rules':
 
-	<configuration>
-  		<configSections>
-	  		<section name="UnpublishOverridesSection" type="Escc.Umbraco.Expiry.Configuration.UnpublishOverridesSection, Escc.Umbraco.Expiry" />
-   		</configSections>
+	*	  'Allow pages to never expire' (alias `allowpagesToNeverExpire`), using the 'True/false' property editor.
+	*	  'Months' (alias `months`), using a custom data type based on 'Numeric' with a minimum value of 0, step size of 1 and no maximum. Validate the property as a number.
+	*	  'Days' (alias `days`), using the same custom data type as 'Months'.  Validate the property as a number.
 
-		<UnpublishOverridesSection>
-            <ContentTypes>
-           		<add name="HomePage" level="*"/>
-                <add name="HomePageItems" level="*"/>
-				<add name="ContentPage" level="2"/>
-            </ContentTypes>
-            <Paths>
-                <add name="/about-this-site/" children="*"/>
-                <add name="/banners/" children=""/>
-            </Paths>
-		</UnpublishOverridesSection>
-	</configuration>
+	On the 'Permissions' tab, set the document type to be allowed at the root, and create one instance of it there. This lets you set a maximum expiry period for all content, which can be useful as a way of enforcing content review. 
 
-### Prevent content from unpublishing based on its document type
+	!['Expiry rules' document type](Documentation\expiry-rules.png)
 
-You can prevent content from having an unpublish date based on its document type and level in the content tree.
+2.	Create another document type (without a template) called 'Document type expiry rule' (alias `documentTypeExpiryRule`). Add five properties on a tab called 'Settings':
 
-Using `add name="HomePage" level="*"` would prevent a page with a document type alias of `HomePage` at any level in the content tree from having an unpublish date.
+	* 'Document types' (alias `documentTypes`) using the 'Document type picker' property editor.
+	* 'Level' (alias `level`), using a custom data type based on 'Numeric' with a minimum value of 1, step size of 1 and no maximum.
+	* 'Force pages to never expire' (alias `forcePagesToNeverExpire`) using the 'True/false' property editor.
+	* 'Months (alias `months`), using the same custom data type as the previous 'Months' property.  Validate the property as a number.
+	* 'Days' (alias `days`), using the same custom data type as 'Months'.  Validate the property as a number.
 
-Using `add name="ContentPage" level="2"` would prevent pages with a document type alias of `ContentPage` that are at level 2 of the content tree from having an unpublish date.
+	On the 'Permissions' tab for the 'Expiry rules' document type, allow this new document type as a child. 
 
-The document type alias in the `name` attribute is case sensitive. The example below would configure overrides for two different document types:
+	By creating an instance of this document type you can prevent content based on the document type(s) you select from having an unpublish date, or set a different limit on their unpublish date, and you can optionally limit that to a specific level in the content tree.
 
-	<UnpublishOverridesSection>
-        <ContentTypes>
-        	<add name="HomePage" level="*"/>
-			<add name="homepage" level="*"/>
-        </ContentTypes>
-	</UnpublishOverridesSection>
+	!['Document type expiry rule' document type](Documentation\document-type-expiry-rule.png)
 
-### Prevent content from unpublishing based on its URL
+3.	Create a third document type (without a template) called 'Page expiry rule' (alias 'pageExpiryRule`). Add five properties on a tab called 'Settings':
 
-It is also possible to prevent content from having an unpublish date based on its URL. This is useful when you have an area of a site which should never be unpublished and that has a mixture of document types, and the same document types should have an unpublish date when used elsewhere.
+	* 'Pages' (alias `pages`) using a custom data type based on 'Umbraco.MultiNodeTreePicker2' and configured to use Content nodes.
+	* 'Apply to descendant pages' (alias `applyToDescendantPages`) using the 'True/false' property editor.
+	* 'Force pages to never expire' (alias `forcePagesToNeverExpire`) using the 'True/false' property editor.
+	* 'Months (alias `months`), using the same custom data type as the previous 'Months' property.  Validate the property as a number.
+	* 'Days' (alias `days`), using the same custom data type as 'Months'.  Validate the property as a number.
 
-	<UnpublishOverridesSection>
-        <Paths>
-            <add name="/about-this-site/" children="*"/>
-            <add name="/banners/" children=""/>
-        </Paths>
-	</UnpublishOverridesSection>
+	On the 'Permissions' tab for the 'Expiry rules' document type, allow this new document type as a child.
 
-The `children=` attribute works similarly to the `level` attribute. If you have `children="*"` then the override also applies to all children under that path, whereas if it is left blank (eg `children=""`) then the override only applies to the single page at the specified path.
+	Creating an instance of this document type allows you to prevent content from having an unpublish date, or set a different limit on its unpublish date, based on its position in the content tree. This is useful when you have an area of a site which should never be unpublished and that has a mixture of document types, and the same document types should follow the default (or different) expiry rules when used elsewhere.
+
+	!['Page expiry rule' document type](Documentation\page-expiry-rule.png)
 
 ## Unpublishing dates API
 

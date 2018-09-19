@@ -14,7 +14,7 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result= matcher.MatchRule();
 
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
         }
 
         [Test]
@@ -25,7 +25,7 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result = matcher.MatchRule();
 
-            Assert.IsFalse(result);
+            Assert.IsNull(result);
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result = matcher.MatchRule();
 
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
         }
 
         [Test]
@@ -47,7 +47,7 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result = matcher.MatchRule();
 
-            Assert.IsFalse(result);
+            Assert.IsNull(result);
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result = matcher.MatchRule();
 
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
         }
     }
 }

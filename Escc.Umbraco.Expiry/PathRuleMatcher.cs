@@ -62,7 +62,7 @@ namespace Escc.Umbraco.Expiry
             if (matchedRule == null) return null;
 
             // The override applies to all children too, so return the rule
-            if (matchedRule.Children == "*") return matchedRule;
+            if (matchedRule.ApplyToDescendantPages) return matchedRule;
 
             // All other tests failed, so return no override
             return null;

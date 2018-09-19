@@ -143,6 +143,9 @@
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Our.Umbraco.DocumentTypePicker, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Our.Umbraco.DocumentTypePicker.1.0.0\lib\Our.Umbraco.DocumentTypePicker.dll</HintPath>
+    </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
@@ -246,18 +249,15 @@
     <Compile Include="SqlServerExpiryLogRepository.cs" />
     <Compile Include="UmbracoUser.cs" />
     <Compile Include="ExpiryRulesEventHandler.cs" />
-    <Compile Include="ExpiryRulesFromConfig.cs" />
+    <Compile Include="ExpiryRulesFromUmbraco.cs" />
     <Compile Include="ExpiryController.cs" />
-    <Compile Include="Configuration\UnpublishOverridesContentTypeElement.cs" />
-    <Compile Include="Configuration\UnpublishOverridesContentTypesCollection.cs" />
-    <Compile Include="Configuration\UnpublishOverridesPathElement.cs" />
-    <Compile Include="Configuration\UnpublishOverridesPathsCollection.cs" />
-    <Compile Include="Configuration\UnpublishOverridesSection.cs" />
     <Compile Include="UmbracoPage.cs" />
     <Compile Include="UmbracoPagesForUser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="App_Plugins\DocumentTypePicker\package.manifest" />
+    <None Include="App_Plugins\Escc.Umbraco.DataTypes.MediaUsage\package.manifest" />
     <None Include="build-nuget.cmd" />
     <None Include="Escc.Umbraco.Expiry.nuspec" />
     <None Include="packages.config" />
@@ -265,6 +265,11 @@
     <None Include="Web.config.uninstall.xdt" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Plugins\DocumentTypePicker\DocumentTypePickerController.js" />
+    <Content Include="App_Plugins\DocumentTypePicker\DocumentTypePickerView.html" />
+    <Content Include="App_Plugins\Escc.Umbraco.DataTypes.MediaUsage\mediausage.controller.js" />
+    <Content Include="App_Plugins\Escc.Umbraco.DataTypes.MediaUsage\mediausage.html" />
+    <Content Include="App_Plugins\Escc.Umbraco.DataTypes.MediaUsage\mediausage.resource.js" />
     <Content Include="SqlServerSetup.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -278,5 +283,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Escc.Umbraco.MediaSync.2.0.0\build\Escc.Umbraco.MediaSync.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Escc.Umbraco.MediaSync.2.0.0\build\Escc.Umbraco.MediaSync.targets'))" />
+    <Error Condition="!Exists('..\packages\Our.Umbraco.DocumentTypePicker.1.0.0\build\Our.Umbraco.DocumentTypePicker.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Our.Umbraco.DocumentTypePicker.1.0.0\build\Our.Umbraco.DocumentTypePicker.targets'))" />
   </Target>
+  <Import Project="..\packages\Our.Umbraco.DocumentTypePicker.1.0.0\build\Our.Umbraco.DocumentTypePicker.targets" Condition="Exists('..\packages\Our.Umbraco.DocumentTypePicker.1.0.0\build\Our.Umbraco.DocumentTypePicker.targets')" />
 </Project>

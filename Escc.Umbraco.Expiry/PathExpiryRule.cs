@@ -19,7 +19,7 @@ namespace Escc.Umbraco.Expiry
         /// <summary>
         /// Gets or sets whether the rule should be applied to child nodes.
         /// </summary>
-        public string Children { get; set; }
+        public bool ApplyToDescendantPages { get; set; }
 
         /// <summary>
         /// Gets or sets the length of time pages of this document type are allowed to be published before they expire.

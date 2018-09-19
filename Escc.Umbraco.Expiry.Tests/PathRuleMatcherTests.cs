@@ -18,7 +18,7 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result = matcher.MatchRule();
 
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
         }
 
         [Test]
@@ -29,7 +29,7 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result = matcher.MatchRule();
 
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result = matcher.MatchRule();
 
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
         }
 
         [Test]
@@ -51,29 +51,29 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result = matcher.MatchRule();
 
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
         }
 
         [Test]
         public void ChildPathIsMatchedWithWildcard()
         {
-            var rules = new[] { new PathExpiryRule() { Path = "/example/", Children = "*" } };
+            var rules = new[] { new PathExpiryRule() { Path = "/example/", ApplyToDescendantPages = true } };
             var matcher = new PathRuleMatcher(rules, "/example/child/");
 
             var result = matcher.MatchRule();
 
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
         }
 
         [Test]
         public void ChildPathIsNotMatchedWithoutWildcard()
         {
-            var rules = new[] { new PathExpiryRule() { Path = "/example/", Children = "" } };
+            var rules = new[] { new PathExpiryRule() { Path = "/example/", ApplyToDescendantPages = false } };
             var matcher = new PathRuleMatcher(rules, "/example/child/");
 
             var result = matcher.MatchRule();
 
-            Assert.IsFalse(result);
+            Assert.IsNull(result);
         }
 
         [Test]
@@ -84,7 +84,7 @@ namespace Escc.Umbraco.Expiry.Tests
 
             var result = matcher.MatchRule();
 
-            Assert.IsFalse(result);
+            Assert.IsNull(result);
         }
     }
 }

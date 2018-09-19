@@ -26,6 +26,6 @@ namespace Escc.Umbraco.Expiry
         /// <summary>
         /// Gets the default length of time pages are allowed to be published before they expire.
         /// </summary>
-        TimeSpan DefaultMaximumExpiry { get; }
+        TimeSpan? DefaultMaximumExpiry { get; }
     }
 }

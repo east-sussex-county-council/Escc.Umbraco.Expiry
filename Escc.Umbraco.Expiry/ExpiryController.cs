@@ -107,7 +107,7 @@ namespace Escc.Umbraco.Expiry
         private void SetOrRemoveUnpublishDate(IPublishedContent publishedContent)
         {
             var contentService = ApplicationContext.Current.Services.ContentService;
-            var expiryRuleProvider = new ExpiryRulesFromConfig();
+            var expiryRuleProvider = new ExpiryRulesFromUmbraco(UmbracoContext.ContentCache);
             var expiryRule = new ExpiryRuleEvaluator().CheckOverride(expiryRuleProvider, publishedContent);
 
             try
@@ -127,12 +127,13 @@ namespace Escc.Umbraco.Expiry
                     if (expiryRule != null && expiryRule.MaximumExpiry.HasValue)
                     {
                         node.ExpireDate = DateTime.Now.Add(expiryRule.MaximumExpiry.Value);
+                       contentService.SaveAndPublishWithStatus(node);
                     }
-                    else
+                    else if (expiryRuleProvider.DefaultMaximumExpiry.HasValue)
                     {
-                        node.ExpireDate = DateTime.Now.Add(expiryRuleProvider.DefaultMaximumExpiry);
+                        node.ExpireDate = DateTime.Now.Add(expiryRuleProvider.DefaultMaximumExpiry.Value);
+                        contentService.SaveAndPublishWithStatus(node);
                     }
-                    contentService.SaveAndPublishWithStatus(node);
                 }
             }
             catch (Exception e)
