@@ -65,12 +65,16 @@ namespace Escc.Umbraco.Expiry
                 var documentTypes = documentTypeRule.GetPropertyValue<IEnumerable<string>>("documentTypes");
                 foreach (var documentType in documentTypes)
                 {
-                    int? level = null;
-                    if (!String.IsNullOrEmpty(documentTypeRule.GetPropertyValue<string>("level")))
+                    var rule = new DocumentTypeExpiryRule() { Alias = documentType };
+
+                    string savedLevel = documentTypeRule.GetPropertyValue<string>("level");
+                    int? parsedLevel = null;
+
+                    if (!String.IsNullOrEmpty(savedLevel))
                     {
-                        level = Int32.Parse(documentTypeRule.GetPropertyValue<string>("level"), CultureInfo.CurrentCulture);
+                        parsedLevel = Int32.Parse(savedLevel, CultureInfo.CurrentCulture);
+                        if (parsedLevel > 0) rule.Level = parsedLevel;
                     }
-                    var rule = new DocumentTypeExpiryRule() { Alias = documentType, Level = level };
 
                     if (DocumentTypeRules.FirstOrDefault(alreadyAdded => alreadyAdded.Alias == rule.Alias && alreadyAdded.Level == rule.Level) == null)
                     {
