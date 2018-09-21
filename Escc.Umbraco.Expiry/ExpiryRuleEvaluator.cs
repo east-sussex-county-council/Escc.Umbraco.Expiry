@@ -40,9 +40,12 @@ namespace Escc.Umbraco.Expiry
 
             // Date cannot be more than a set timespan into the future
             DateTime? maximumDate = null;
-            if (expiryRule != null && expiryRule.MaximumExpiry.HasValue)
+            if (expiryRule != null)
             {
-                maximumDate = timePublished.Add(expiryRule.MaximumExpiry.Value);
+                if (expiryRule.MaximumExpiry.HasValue)
+                {
+                    maximumDate = timePublished.Add(expiryRule.MaximumExpiry.Value);
+                }
             }
             else if (defaultMaximumExpiry.HasValue)
             {

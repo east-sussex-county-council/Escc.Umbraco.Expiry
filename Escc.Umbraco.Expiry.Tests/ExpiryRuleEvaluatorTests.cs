@@ -182,5 +182,33 @@ namespace Escc.Umbraco.Expiry.Tests
             Assert.IsNotNull(result.ExpireDateChangedMessage);
             Assert.IsNull(result.CancellationMessage);
         }
+
+        [Test]
+        public void RuleAppliedForcingNeverExpireInsteadOfDefaultExpiry()
+        {
+            var ruleEvaluator = new ExpiryRuleEvaluator();
+            var publicationTime = new DateTime(2018, 1, 1);
+            var defaultExpiry = new TimeSpan(30, 0, 0, 0);
+            TimeSpan? ruleExpiry = null;
+            DateTime? userSelectedExpiry = null;
+            var documentTypeMatcher = new Mock<IDocumentTypeRuleMatcher>();
+            var matchedRule = new Mock<IExpiryRule>();
+            matchedRule.Setup(x => x.MaximumExpiry).Returns(ruleExpiry);
+            documentTypeMatcher.Setup(x => x.MatchRule("example", 0)).Returns(matchedRule.Object);
+            var pathMatcher = new Mock<IPathRuleMatcher>();
+            var content = new Mock<IContent>();
+            var documentType = new Mock<IContentType>();
+            documentType.Setup(x => x.Alias).Returns("example");
+            content.SetupGet(x => x.ContentType).Returns(documentType.Object);
+            content.SetupGet(x => x.ExpireDate).Returns(userSelectedExpiry);
+            var urlBuilder = new Mock<INodeUrlBuilder>();
+            urlBuilder.Setup(x => x.GetNodeUrl(content.Object)).Returns("/example");
+
+            var result = ruleEvaluator.ApplyExpiryRules(publicationTime, defaultExpiry, documentTypeMatcher.Object, pathMatcher.Object, content.Object, urlBuilder.Object);
+
+            Assert.IsNull(result.ExpireDate);
+            Assert.IsNull(result.ExpireDateChangedMessage);
+            Assert.IsNull(result.CancellationMessage);
+        }
     }
 }
