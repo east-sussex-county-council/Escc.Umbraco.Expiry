@@ -120,7 +120,8 @@ namespace Escc.Umbraco.Expiry
                     userPage.ExpiryDate = new DateTime(Int32.Parse(expireDate.Substring(0, 4)), Int32.Parse(expireDate.Substring(4, 2)), Int32.Parse(expireDate.Substring(6, 2)), Int32.Parse(expireDate.Substring(8, 2)), Int32.Parse(expireDate.Substring(10, 2)), Int32.Parse(expireDate.Substring(12, 2)));
                 }
 
-                var permissionsForNode = GetPermissionsForNodeWithInheritance(_contentService.GetById(userPage.PageId));
+                var permissionsForNode = new List<EntityPermission>();
+                GetPermissionsForNodeWithInheritance(_contentService.GetById(userPage.PageId), permissionsForNode);
 
                 // If there are no active users with permissions to the page, add the page to the admin list
                 var pageHasActiveUserWithPermissions = false;
@@ -149,15 +150,18 @@ namespace Escc.Umbraco.Expiry
                     var usersInGroup = _userService.GetAllInGroup(permission.UserGroupId);
                     foreach (var user in usersInGroup)
                     {
+                        // Check that this author is not Disabled / Locked Out
+                        // If they are, end this loop and move onto the next author
+                        if (user.UserState == UserState.Invited || user.UserState == UserState.Disabled || user.UserState == UserState.LockedOut)
+                        {
+                            continue;
+                        }
+
                         var pagesForUser = userPages.FirstOrDefault(f => f.User.UserId == user.Id);
 
                         // Create a User record if one does not yet exist
                         if (pagesForUser == null)
                         {
-                            // Check that this author is not Disabled / Locked Out
-                            // If they are, end this loop and move onto the next author
-                            if (!user.IsApproved) continue;
-
                             pagesForUser = new UmbracoPagesForUser
                             {
                                 User = new UmbracoUser
@@ -181,37 +185,25 @@ namespace Escc.Umbraco.Expiry
             return userPages;
         }
 
-        private IEnumerable<EntityPermission> GetPermissionsForNodeWithInheritance(IContent entity)
+        private void GetPermissionsForNodeWithInheritance(IContent entity, List<EntityPermission> permissions)
         {
-            IEnumerable<EntityPermission> entityPermissions;
-            if (_permissions.ContainsKey(entity.Id))
-            {
-                entityPermissions = _permissions[entity.Id];
-            }
-            else
-            {
-                // if no permissions at all, then there will be only one element which will contain a "-"
-                // If only the default permission then there will only be one element which will contain "F" (Browse Node)
-                entityPermissions = _contentService.GetPermissionsForEntity(entity)
+            // if no permissions at all, then there will be only one element which will contain a "-"
+            // If only the default permission then there will only be one element which will contain "F" (Browse Node)
+            var entityPermissions = _contentService.GetPermissionsForEntity(entity)
                     .Where(x =>
                                 x.AssignedPermissions.Count() > 1 ||
                                 (x.AssignedPermissions[0] != "-" && x.AssignedPermissions[0] != "F"));
-                _permissions.Add(entity.Id, entityPermissions);
+            if (entityPermissions.Any())
+            {
+                permissions.AddRange(entityPermissions);
             }
 
-            while (!entityPermissions.Any())
+            // Permissions in Umbraco are inherited from ancestor nodes, so look up the tree for further permissions
+            entity = entity.Parent();
+            if (entity != null)
             {
-                entity = entity.Parent();
-                if (entity != null)
-                {
-                    entityPermissions = GetPermissionsForNodeWithInheritance(entity);
-                }
-                else
-                {
-                    break;
-                }
+                GetPermissionsForNodeWithInheritance(entity, permissions);
             }
-            return entityPermissions;
         }
     }
 }
