@@ -27,7 +27,7 @@ Create document types in Umbraco matching the following specification to allow e
 
 	On the 'Permissions' tab, set the document type to be allowed at the root, and create one instance of it there. This lets you set a maximum expiry period for all content, which can be useful as a way of enforcing content review. 
 
-	!['Expiry rules' document type](Documentation\expiry-rules.png)
+	!['Expiry rules' document type](Documentation/expiry-rules.png)
 
 2.	Create another document type (without a template) called 'Document type expiry rule' (alias `documentTypeExpiryRule`). Add five properties on a tab called 'Settings':
 
@@ -41,7 +41,7 @@ Create document types in Umbraco matching the following specification to allow e
 
 	By creating an instance of this document type you can prevent content based on the document type(s) you select from having an unpublish date, or set a different limit on their unpublish date, and you can optionally limit that to a specific level in the content tree.
 
-	!['Document type expiry rule' document type](Documentation\document-type-expiry-rule.png)
+	!['Document type expiry rule' document type](Documentation/document-type-expiry-rule.png)
 
 3.	Create a third document type (without a template) called 'Page expiry rule' (alias 'pageExpiryRule`). Add five properties on a tab called 'Settings':
 
@@ -55,7 +55,7 @@ Create document types in Umbraco matching the following specification to allow e
 
 	Creating an instance of this document type allows you to prevent content from having an unpublish date, or set a different limit on its unpublish date, based on its position in the content tree. This is useful when you have an area of a site which should never be unpublished and that has a mixture of document types, and the same document types should follow the default (or different) expiry rules when used elsewhere.
 
-	!['Page expiry rule' document type](Documentation\page-expiry-rule.png)
+	!['Page expiry rule' document type](Documentation/page-expiry-rule.png)
 
 ## Unpublishing dates API
 
