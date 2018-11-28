@@ -21,17 +21,62 @@ namespace Escc.Umbraco.Expiry
     public class ExpiryController : UmbracoApiController
     {
         /// <summary>
-        /// Checks for expiring pages, collated according to the user responsible for them
+        /// Checks for pages expiring soon and those due never to expire
         /// </summary>
         /// <param name="inTheNextHowManyDays">The date range, beginning today, during which the pages we want to know about are due to expire.</param>
         /// <returns></returns>
         [HttpGet]
-        public HttpResponseMessage CheckForExpiringNodesByUser(int inTheNextHowManyDays)
+        public HttpResponseMessage CheckForExpiringPages(int inTheNextHowManyDays)
         {
             try
             {
-                var expiringPagesService = new ExaminePageExpiryService(ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"], Services.UserService, Services.ContentService,  Umbraco, ConfigurationManager.AppSettings["AdminAccountName"], ConfigurationManager.AppSettings["AdminAccountEmail"]);
-                var nodes = expiringPagesService.GetExpiringNodesByUser(inTheNextHowManyDays);
+                var expiringPagesService = new ExaminePageExpiryService(ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"],  Umbraco);
+                var nodes = expiringPagesService.GetExpiringPages(inTheNextHowManyDays);
+
+                return Request.CreateResponse(HttpStatusCode.OK, nodes);
+            }
+            catch (Exception ex)
+            {
+                ex.ToExceptionless().Submit();
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets the ids of all user groups with permissions to a page
+        /// </summary>
+        /// <param name="pageId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public HttpResponseMessage GroupsWithPermissionsForPage(int pageId)
+        {
+            try
+            {
+                var expiringPagesService = new UmbracoPermissionsService(Services.UserService, Services.ContentService);
+                var nodes = expiringPagesService.GroupsWithPermissionsForPage(pageId);
+
+                return Request.CreateResponse(HttpStatusCode.OK, nodes);
+            }
+            catch (Exception ex)
+            {
+                ex.ToExceptionless().Submit();
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the ids and emails of all users in a group
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public HttpResponseMessage ActiveUsersInGroup(int groupId)
+        {
+            try
+            {
+                var expiringPagesService = new UmbracoPermissionsService(Services.UserService, Services.ContentService);
+                var nodes = expiringPagesService.ActiveUsersInGroup(groupId);
 
                 return Request.CreateResponse(HttpStatusCode.OK, nodes);
             }
@@ -65,6 +110,10 @@ namespace Escc.Umbraco.Expiry
         }
 
         [HttpPost]
+          /// <summary>
+        /// Sets or removes the unpublish date for child nodes.
+        /// </summary>
+        /// <param name="node">The node.</param>
         public void SetOrRemoveUnpublishDateForChildNodes(int parentNodeId)
         {
 

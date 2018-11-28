@@ -37,7 +37,7 @@ namespace Escc.Umbraco.Expiry.Notifier
                 IEmailService emailService = new EmailService(emailAdminAtDays, ConfigurationManager.AppSettings["AdminEmail"], ConfigurationManager.AppSettings["ForceSendTo"], ConfigurationManager.AppSettings["WebsiteName"], new Uri(ConfigurationManager.AppSettings["SiteUri"]), new Uri(ConfigurationManager.AppSettings["WebAuthorsGuidanceUrl"]));
                 IExpiryLogRepository logRepository = new SqlServerExpiryLogRepository();
 
-                var users = dataSource.GetExpiringPagesByUser(inTheNextHowManyDays);
+                var users = dataSource.GetExpiringPagesByUser(inTheNextHowManyDays).Result;
 
                 log.Info("Starting expiry email process");
 

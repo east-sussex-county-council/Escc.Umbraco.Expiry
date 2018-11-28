@@ -232,6 +232,8 @@
   <ItemGroup>
     <Compile Include="DocumentTypeExpiryRule.cs" />
     <Compile Include="DocumentTypeRuleMatcher.cs" />
+    <Compile Include="IPermissionsService.cs" />
+    <Compile Include="UmbracoPermissionsService.cs" />
     <Compile Include="ExaminePageExpiryService.cs" />
     <Compile Include="ExpiryDateFromExamine.cs" />
     <Compile Include="ExpiryLogEntry.cs" />

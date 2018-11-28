@@ -67,22 +67,17 @@ You can call the API with a `POST` request to the following URL. This request mu
 
 ## Check which pages are about to be unpublished
 
-If you are using unpublish dates as a way of forcing content to be reviewed, you will need to check what content is  coming up for review. You can do this with a `POST` request to the following URL. This request must be authenticated using the authentication method configured for web APIs on the consuming site.
+If you are using unpublish dates as a way of forcing content to be reviewed, you will need to check what content is  coming up for review. You can do this with a `GET` request to the following URL. This request must be authenticated using the authentication method configured for web APIs on the consuming site.
 
-	https://hostname/umbraco/api/Expiry/CheckForExpiringNodesByUser/
+	https://hostname/umbraco/api/Expiry/CheckForExpiringPages/
 
-It expects an `inTheNextHowManyDays` parameter, and will return a list of pages due to be unpublished within a date range spanning that many days from today. The list of pages will be subdivided by the Umbraco back office user responsible, based on permissions. Where more than one user has permission to a page, the page will be listed separately for each user.
-
-Note that in `web.config` of the target Umbraco instance you will need two settings to identify the account used to query Umbraco:
-
-	<appSettings>
-	    <add key="AdminAccountName" value="username" />
-    	<add key="AdminAccountEmail" value="email.address@example.org" />
-	</appSettings>
+It expects an `inTheNextHowManyDays` parameter, and will return a list of pages due to be unpublished within a date range spanning that many days from today. 
 
 ## Notify users that their pages are about to be unpublished
 
-You can configure a scheduled task to run `Escc.Umbraco.Expiry.Notifier.exe`. This will look for pages that will expire within a set number of days, and notify the web authors responsible for those pages. The number of days is set in `app.config`.
+You can configure a scheduled task to run `Escc.Umbraco.Expiry.Notifier.exe`. This will look for pages that will expire within a set number of days. The list of pages will be subdivided by the Umbraco back office user responsible, based on permissions. Where more than one user has permission to a page, the page will be listed separately for each user. The app will then notify the web authors responsible for those pages. 
+
+The number of days is set in `app.config`.
 
 ## Email
 

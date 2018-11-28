@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Escc.Umbraco.Expiry.Notifier
 {
@@ -12,6 +13,6 @@ namespace Escc.Umbraco.Expiry.Notifier
         /// </summary>
         /// <param name="inTheNextHowManyDays">The date range to look for expiring pages, based on the number of days from today.</param>
         /// <returns></returns>
-        IList<UmbracoPagesForUser> GetExpiringPagesByUser(int inTheNextHowManyDays);
+        Task<IList<UmbracoPagesForUser>> GetExpiringPagesByUser(int inTheNextHowManyDays);
     }
 }

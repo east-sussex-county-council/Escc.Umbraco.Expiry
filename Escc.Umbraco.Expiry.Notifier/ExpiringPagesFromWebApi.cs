@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Escc.Umbraco.Expiry.Notifier
 {
@@ -37,13 +39,76 @@ namespace Escc.Umbraco.Expiry.Notifier
         /// <param name="inTheNextHowManyDays">The date range to look for expiring pages, based on the number of days from today.</param>
         /// <returns></returns>
         /// <exception cref="WebException"></exception>
-        public IList<UmbracoPagesForUser> GetExpiringPagesByUser(int inTheNextHowManyDays)
+        public async Task<IList<UmbracoPagesForUser>> GetExpiringPagesByUser(int inTheNextHowManyDays)
         {
-            var response = _client.GetAsync(string.Format("CheckForExpiringNodesByUser?inTheNextHowManyDays={0}", inTheNextHowManyDays)).Result;
-
+            var response = await _client.GetAsync(string.Format("CheckForExpiringPages?inTheNextHowManyDays={0}", inTheNextHowManyDays));
             if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
-            var modelList = response.Content.ReadAsAsync<IList<UmbracoPagesForUser>>().Result;
-            return modelList;
+            var pages = response.Content.ReadAsAsync<IEnumerable<UmbracoPage>>().Result;
+
+            // For each page:
+            var allUsersWithPages = new Dictionary<int, UmbracoPagesForUser>();
+
+            // Create a admin account record. Use -1 as an Id as there won't be a valid Umbraco user with that value.
+            var admin = new UmbracoPagesForUser()
+            {
+                User = new UmbracoUser
+                {
+                    UserId = -1,
+                    EmailAddress = ConfigurationManager.AppSettings["AdminEmail"]
+                }
+            };
+            allUsersWithPages.Add(admin.User.UserId, admin);
+
+            foreach (var userPage in pages)
+            {
+                response = await _client.GetAsync(string.Format("GroupsWithPermissionsForPage?pageId={0}", userPage.PageId));
+                if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
+                var groupsWithPermissionsForNode = response.Content.ReadAsAsync<IEnumerable<int>>().Result;
+
+                var usersInGroups = new Dictionary<int, IList<UmbracoUser>>();
+
+                // If there are no active users with permissions to the page, add the page to the admin list
+                var pageHasActiveUserWithPermissions = false;
+                foreach (var groupId in groupsWithPermissionsForNode)
+                {
+                    if (!usersInGroups.ContainsKey(groupId))
+                    {
+                        response = await _client.GetAsync(string.Format("ActiveUsersInGroup?groupId={0}", groupId));
+                        if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
+                        usersInGroups[groupId] = response.Content.ReadAsAsync<IList<UmbracoUser>>().Result;
+                    }
+                    pageHasActiveUserWithPermissions = (usersInGroups[groupId].Count > 0);
+                    if (pageHasActiveUserWithPermissions) break;
+                }
+                if (!pageHasActiveUserWithPermissions)
+                {
+                    admin.Pages.Add(userPage);
+                    continue;
+                }
+
+                // Add the current page to each user that has edit rights
+                foreach (var groupId in groupsWithPermissionsForNode)
+                {
+                    foreach (var user in usersInGroups[groupId])
+                    {
+                        // Create a User record if one does not yet exist
+                        if (!allUsersWithPages.ContainsKey(user.UserId))
+                        { 
+                            var pagesForUser = new UmbracoPagesForUser
+                            {
+                                User = user
+                            };
+                            allUsersWithPages.Add(user.UserId, pagesForUser);
+                        }
+
+                        // Assign the current page to this author
+                        allUsersWithPages[user.UserId].Pages.Add(userPage);
+                    }
+                }
+            }
+
+            // Return a list of users responsible, along with the page details
+            return allUsersWithPages.Values.ToList();
         }
     }
 }

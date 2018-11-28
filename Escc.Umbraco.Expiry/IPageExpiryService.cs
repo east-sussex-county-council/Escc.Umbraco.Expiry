@@ -12,6 +12,6 @@ namespace Escc.Umbraco.Expiry
         /// </summary>
         /// <param name="inTheNextHowManyDays">The date range, beginning today, during which the pages we want to know about are due to expire.</param>
         /// <returns></returns>
-        IList<UmbracoPagesForUser> GetExpiringNodesByUser(int inTheNextHowManyDays);
+        IEnumerable<UmbracoPage> GetExpiringPages(int inTheNextHowManyDays);
     }
 }
