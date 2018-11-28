@@ -62,7 +62,7 @@
       <HintPath>..\packages\Escc.BasicAuthentication.WebApi.1.0.2\lib\Escc.BasicAuthentication.WebApi.dll</HintPath>
     </Reference>
     <Reference Include="Escc.Umbraco, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Escc.Umbraco.5.0.0-beta\lib\net452\Escc.Umbraco.dll</HintPath>
+      <HintPath>..\packages\Escc.Umbraco.5.0.0\lib\net452\Escc.Umbraco.dll</HintPath>
     </Reference>
     <Reference Include="Escc.Umbraco.MediaSync, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Escc.Umbraco.MediaSync.2.0.0\lib\net452\Escc.Umbraco.MediaSync.dll</HintPath>

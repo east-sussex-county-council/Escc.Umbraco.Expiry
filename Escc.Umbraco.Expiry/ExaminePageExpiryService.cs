@@ -62,7 +62,133 @@ namespace Escc.Umbraco.Expiry
         /// <returns>
         /// List Users with expiring pages they are responsible for
         /// </returns>
+        [Obsolete("Takes too long on large sites. Use GetExpiringNodes(), PermissionsForPage() and UserById() instead.")]
         public IList<UmbracoPagesForUser> GetExpiringNodesByUser(int inTheNextHowManyDays)
+        {
+            List<UmbracoPage> pages = GetExpiringNodes(inTheNextHowManyDays);
+
+            // For each page:
+            IList<UmbracoPagesForUser> userPages = new List<UmbracoPagesForUser>();
+
+            // Create a admin account record. Use -1 as an Id as there won't be a valid Umbraco user with that value.
+            var admin = new UmbracoPagesForUser();
+            var adminUser = new UmbracoUser
+            {
+                UserId = -1,
+                EmailAddress = _adminAccountEmail
+            };
+            admin.User = adminUser;
+            userPages.Add(admin);
+
+            foreach (var page in pages)
+            {
+                IEnumerable<int> userIdsWithPermission = PermissionsForPage(page.PageId);
+
+                // if no Web Authors, add this page to the WebStaff list
+                if (!userIdsWithPermission.Any())
+                {
+
+                    foreach (var adminPages in userPages.Where(p => p.User.UserId == -1))
+                    {
+                        adminPages.Pages.Add(page);
+                    }
+                    continue;
+                }
+
+                // if all Authors of a page are disabled, add page to the webStaff list
+                List<int> disabledUsers = new List<int>();
+                foreach (var userId in userIdsWithPermission)
+                {
+                    var tempUser = _userService.GetUserById(userId);
+                    if (!tempUser.IsApproved)
+                    {
+                        disabledUsers.Add(userId);
+                    }
+                }
+                if (disabledUsers.Count == userIdsWithPermission.Count())
+                {
+                    foreach (var adminPages in userPages.Where(p => p.User.UserId == -1))
+                    {
+                        adminPages.Pages.Add(page);
+                    }
+                    continue;
+                }
+
+                // Add the current page to each user that has edit rights
+                foreach (var userId in userIdsWithPermission)
+                {
+                    var user = userPages.FirstOrDefault(f => f.User.UserId == userId);
+
+                    // Create a User record if one does not yet exist
+                    if (user == null)
+                    {
+                        UmbracoUser p = UserById(userId);
+
+                        // Check that this author is not Disabled / Locked Out
+                        // If they are, end this loop and move onto the next author
+                        if (!p.IsApproved) continue;
+
+                        user = new UmbracoPagesForUser { User = p };
+                        userPages.Add(user);
+                    }
+
+                    // Assign the current page (outer loop) to this author
+                    foreach (var authorPages in userPages.Where(p => p.User.UserId == user.User.UserId))
+                    {
+                        authorPages.Pages.Add(page);
+                    }
+                }
+            }
+
+            // Return a list of users to email, along with the page details
+            return userPages;
+        }
+
+        /// <summary>
+        /// Gets name, email and approval status of an Umbraco user
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public UmbracoUser UserById(int userId)
+        {
+            var user = _userService.GetUserById(userId);
+
+            return new UmbracoUser
+            {
+                UserId = userId,
+                UserName = user.Username,
+                FullName = user.Name,
+                EmailAddress = user.Email,
+                IsApproved = user.IsApproved
+            };
+        }
+
+
+
+        /// <summary>
+        /// Gets the permissions for a page, so long as it's more than just Browse Node
+        /// </summary>
+        /// <param name="pageId"></param>
+        /// <returns>Ids of users with permissions to the page</returns>
+        public IEnumerable<int> PermissionsForPage(int pageId)
+        {
+            // Get Web Authors with permission
+            // if no permissions at all, then there will be only one element which will contain a "-"
+            // If only the default permission then there will only be one element which will contain "F" (Browse Node)
+            return _contentService.GetPermissionsForEntity(_contentService.GetById(pageId))
+                    .Where(
+                        x =>
+                            x.AssignedPermissions.Count() > 1 ||
+                            (x.AssignedPermissions[0] != "-" && x.AssignedPermissions[0] != "F")).Select(permission => permission.UserId);
+        }
+
+        /// <summary>
+        /// Get a list of expiring pages
+        /// </summary>
+        /// <param name="inTheNextHowManyDays">
+        /// How many days to look forward
+        /// </param>
+        public List<UmbracoPage> GetExpiringNodes(int inTheNextHowManyDays)
         {
             // if the node is expiring within the declared period, add it to the list
             // if the node has a null expire date and is published, also add it to the list as it is a never expiring page
@@ -73,114 +199,25 @@ namespace Escc.Umbraco.Expiry
             // Sorting using Examine would be faster but was not working, so sort the results in .NET
             var expiringNodes = _examineSearcher.Search(query).OrderBy(result => result.Fields["expireDate"].ToString());
 
-            // For each page:
-            IList<UmbracoPagesForUser> userPages = new List<UmbracoPagesForUser>();
-
-            // Create a admin account record. Use -1 as an Id as there won't be a valid Umbraco user with that value.
-            var admin = new UmbracoPagesForUser();
-            var adminUser = new UmbracoUser
-            {
-                UserId = -1,
-                UserName = _adminAccountName.Replace(" ", ""),
-                FullName = _adminAccountName,
-                EmailAddress = _adminAccountEmail
-            };
-            admin.User = adminUser;
-            userPages.Add(admin);
-
+            var pages = new List<UmbracoPage>();
             foreach (var expiringNode in expiringNodes)
             {
-                var userPage = new UmbracoPage
-                    {
-                        PageId = Int32.Parse(expiringNode.Fields["__NodeId"], CultureInfo.InvariantCulture),
-                        PageName = expiringNode.Fields["nodeName"],
-                        PagePath = expiringNode.Fields["path"]
-                    };
-                userPage.PageUrl = _umbracoHelper.NiceUrl(userPage.PageId);
+                var page = new UmbracoPage
+                {
+                    PageId = Int32.Parse(expiringNode.Fields["__NodeId"], CultureInfo.InvariantCulture),
+                    PageName = expiringNode.Fields["nodeName"],
+                    PagePath = expiringNode.Fields["path"]
+                };
+                page.PageUrl = _umbracoHelper.NiceUrl(page.PageId);
                 if (expiringNode.Fields["expireDate"] != "99991231235959")
                 {
                     var expireDate = expiringNode.Fields["expireDate"].ToString();
-                    userPage.ExpiryDate = new DateTime(Int32.Parse(expireDate.Substring(0, 4)), Int32.Parse(expireDate.Substring(4, 2)), Int32.Parse(expireDate.Substring(6, 2)), Int32.Parse(expireDate.Substring(8, 2)), Int32.Parse(expireDate.Substring(10, 2)), Int32.Parse(expireDate.Substring(12, 2)));
+                    page.ExpiryDate = new DateTime(Int32.Parse(expireDate.Substring(0, 4)), Int32.Parse(expireDate.Substring(4, 2)), Int32.Parse(expireDate.Substring(6, 2)), Int32.Parse(expireDate.Substring(8, 2)), Int32.Parse(expireDate.Substring(10, 2)), Int32.Parse(expireDate.Substring(12, 2)));
                 }
-
-                // Get Web Authors with permission
-                // if no permissions at all, then there will be only one element which will contain a "-"
-                // If only the default permission then there will only be one element which will contain "F" (Browse Node)
-                var perms =
-                    _contentService.GetPermissionsForEntity(_contentService.GetById(userPage.PageId))
-                        .Where(
-                            x =>
-                                x.AssignedPermissions.Count() > 1 ||
-                                (x.AssignedPermissions[0] != "-" && x.AssignedPermissions[0] != "F"));
-                
-                var nodeAuthors = perms as IList<EntityPermission> ?? perms.ToList();
-
-                // if no Web Authors, add this page to the WebStaff list
-                if (!nodeAuthors.Any())
-                {
-
-                    foreach (var adminPages in userPages.Where(p => p.User.UserId == -1))
-                    {
-                        adminPages.Pages.Add(userPage);
-                    }
-                    continue;
-                }
-
-                // if all Authors of a page are disabled, add page to the webStaff list
-                List<EntityPermission> disabledUsers = new List<EntityPermission>();
-                foreach (var user in nodeAuthors)
-                {
-                    var tempUser = _userService.GetUserById(user.UserId);
-                    if (!tempUser.IsApproved)
-                    {
-                        disabledUsers.Add(user);
-                    }
-                }
-                if(disabledUsers.Count == nodeAuthors.Count)
-                {
-                    foreach (var adminPages in userPages.Where(p => p.User.UserId == -1))
-                    {
-                        adminPages.Pages.Add(userPage);
-                    }
-                    continue;
-                }
-
-                // Add the current page to each user that has edit rights
-                foreach (var author in nodeAuthors)
-                {
-                    var user = userPages.FirstOrDefault(f => f.User.UserId == author.UserId);
-
-                    // Create a User record if one does not yet exist
-                    if (user == null)
-                    {
-                        var pUser = _userService.GetUserById(author.UserId);
-
-                        // Check that this author is not Disabled / Locked Out
-                        // If they are, end this loop and move onto the next author
-                        if (!pUser.IsApproved) continue;
-
-                        var p = new UmbracoUser
-                        {
-                            UserId = author.UserId,
-                            UserName = pUser.Username,
-                            FullName = pUser.Name,
-                            EmailAddress = pUser.Email
-                        };
-
-                        user = new UmbracoPagesForUser {User = p};
-                        userPages.Add(user);
-                    }
-
-                    // Assign the current page (outer loop) to this author
-                    foreach (var authorPages in userPages.Where(p => p.User.UserId == user.User.UserId))
-                    {
-                        authorPages.Pages.Add(userPage);
-                    }
-                }
+                pages.Add(page);
             }
 
-            // Return a list of users to email, along with the page details
-            return userPages;
+            return pages;
         }
     }
 }

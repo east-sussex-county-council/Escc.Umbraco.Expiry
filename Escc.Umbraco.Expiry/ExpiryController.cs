@@ -26,6 +26,7 @@ namespace Escc.Umbraco.Expiry
         /// <param name="inTheNextHowManyDays">The date range, beginning today, during which the pages we want to know about are due to expire.</param>
         /// <returns></returns>
         [HttpGet]
+        [Obsolete("Takes too long on large sites. Use GetExpiringNodes(), PermissionsForPage() and UserId() instead.")]
         public HttpResponseMessage CheckForExpiringNodesByUser(int inTheNextHowManyDays)
         {
             try
@@ -34,6 +35,72 @@ namespace Escc.Umbraco.Expiry
                 var nodes = expiringPagesService.GetExpiringNodesByUser(inTheNextHowManyDays);
 
                 return Request.CreateResponse(HttpStatusCode.OK, nodes);
+            }
+            catch (Exception ex)
+            {
+                ex.ToExceptionless().Submit();
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+        /// <summary>
+        /// Checks for expiring pages, collated according to the user responsible for them
+        /// </summary>
+        /// <param name="inTheNextHowManyDays">The date range, beginning today, during which the pages we want to know about are due to expire.</param>
+        /// <returns></returns>
+        [HttpGet]
+        public HttpResponseMessage CheckForExpiringNodes(int inTheNextHowManyDays)
+        {
+            try
+            {
+                var expiringPagesService = new ExaminePageExpiryService(ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"], Services.UserService, Services.ContentService, Umbraco, ConfigurationManager.AppSettings["AdminAccountName"], ConfigurationManager.AppSettings["AdminAccountEmail"]);
+                var nodes = expiringPagesService.GetExpiringNodes(inTheNextHowManyDays);
+
+                return Request.CreateResponse(HttpStatusCode.OK, nodes);
+            }
+            catch (Exception ex)
+            {
+                ex.ToExceptionless().Submit();
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets the permissions information for a page
+        /// </summary>
+        /// <param name="pageId">The id of the content node.</param>
+        /// <returns>Ids of users with permissions for the page</returns>
+        [HttpGet]
+        public HttpResponseMessage PermissionsForPage(int pageId)
+        {
+            try
+            {
+                var expiringPagesService = new ExaminePageExpiryService(ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"], Services.UserService, Services.ContentService, Umbraco, ConfigurationManager.AppSettings["AdminAccountName"], ConfigurationManager.AppSettings["AdminAccountEmail"]);
+                var permissions = expiringPagesService.PermissionsForPage(pageId);
+
+                return Request.CreateResponse(HttpStatusCode.OK, permissions);
+            }
+            catch (Exception ex)
+            {
+                ex.ToExceptionless().Submit();
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets email and approval status of an Umbraco user
+        /// </summary>
+        /// <param name="userId">The id of the user.</param>
+        /// <returns></returns>
+        [HttpGet]
+        public HttpResponseMessage UserById(int userId)
+        {
+            try
+            {
+                var expiringPagesService = new ExaminePageExpiryService(ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"], Services.UserService, Services.ContentService, Umbraco, ConfigurationManager.AppSettings["AdminAccountName"], ConfigurationManager.AppSettings["AdminAccountEmail"]);
+                var user = expiringPagesService.UserById(userId);
+
+                return Request.CreateResponse(HttpStatusCode.OK, user);
             }
             catch (Exception ex)
             {

@@ -54,6 +54,11 @@ namespace Escc.Umbraco.Expiry
         /// Gets or sets the user identifier.
         /// </summary>
         public int UserId { get; set; }
+        
+        /// <summary>
+        /// Gets or sets whether a user can sign in.
+        /// </summary>
+        public bool IsApproved { get; set; }
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance in activity logs
@@ -63,7 +68,7 @@ namespace Escc.Umbraco.Expiry
         /// </returns>
         public override string ToString()
         {
-            return string.Format("[UserName:{0},FullName:{1},EmailAddress:{2},UserId:{3}]", UserName, FullName, EmailAddress, UserId);
+            return string.Format("[EmailAddress:{0},UserId:{1}]", EmailAddress, UserId);
         }
     }
 }
