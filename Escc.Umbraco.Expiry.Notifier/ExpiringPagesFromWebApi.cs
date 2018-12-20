@@ -77,8 +77,7 @@ namespace Escc.Umbraco.Expiry.Notifier
                         if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
                         usersInGroups[groupId] = response.Content.ReadAsAsync<IList<UmbracoUser>>().Result;
                     }
-                    pageHasActiveUserWithPermissions = (usersInGroups[groupId].Count > 0);
-                    if (pageHasActiveUserWithPermissions) break;
+                    pageHasActiveUserWithPermissions = (pageHasActiveUserWithPermissions || usersInGroups[groupId].Count > 0);
                 }
                 if (!pageHasActiveUserWithPermissions)
                 {
