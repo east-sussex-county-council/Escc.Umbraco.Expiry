@@ -62,33 +62,48 @@ namespace Escc.Umbraco.Expiry
         /// <summary>
         /// Gets the ids of all user groups with permissions to a page
         /// </summary>
-        /// <param name="pageId"></param>
+        /// <param name="pageId">The integer id of a content node</param>
+        /// <exception cref="ArgumentException">Thrown if pageId does not refer to a content node</exception>
         /// <returns></returns>
         public List<int> GroupsWithPermissionsForPage(int pageId)
         {
-            var groupsWithPermissionsForNode = new List<int>();
-            GetPermissionsForNodeWithInheritance(_contentService.GetById(pageId), groupsWithPermissionsForNode);
-            return groupsWithPermissionsForNode;
+            var groupsWithAllowPermissionsForNode = new List<int>();
+            var groupsWithDenyPermissionsForNode = new List<int>();
+            var contentNode = _contentService.GetById(pageId);
+            if (contentNode == null) throw new ArgumentException($"pageId {pageId} was not found", nameof(pageId));
+            GetPermissionsForNodeWithInheritance(contentNode, groupsWithAllowPermissionsForNode, groupsWithDenyPermissionsForNode);
+            return groupsWithAllowPermissionsForNode;
         }
 
-        private void GetPermissionsForNodeWithInheritance(IContent entity, List<int> groupIdsWithPermission)
+        private void GetPermissionsForNodeWithInheritance(IContent entity, List<int> groupIdsWithAllowPermission, List<int> groupIdsWithDenyPermission)
         {
-            // if no permissions at all, then there will be only one element which will contain a "-"
-            // If only the default permission then there will only be one element which will contain "F" (Browse Node)
+            const string BROWSE_NODE = "F";
+            const string UPDATE = "A";
+
+            // if no permissions at all, then there will be only one element which will contain a "-" so exclude those
             var entityPermissions = _contentService.GetPermissionsForEntity(entity)
-                    .Where(x =>
-                                x.AssignedPermissions.Count() > 1 ||
-                                (x.AssignedPermissions[0] != "-" && x.AssignedPermissions[0] != "F"));
-            if (entityPermissions.Any())
+                    .Where(x => x.AssignedPermissions.Count() > 1 || x.AssignedPermissions[0] != "-");
+
+            foreach (var entityPermission in entityPermissions)
             {
-                groupIdsWithPermission.AddRange(entityPermissions.Select(x => x.UserGroupId));
+                // If only the default permission then there will only be one element which will contain "F" (Browse Node)
+                // This is effectively a Deny permission for editing.
+                if (entityPermission.AssignedPermissions.Count() == 1 && entityPermission.AssignedPermissions[0] == BROWSE_NODE)
+                {
+                    groupIdsWithDenyPermission.Add(entityPermission.UserGroupId);
+                }
+
+                if (entityPermission.AssignedPermissions[0].Contains(UPDATE) && !groupIdsWithDenyPermission.Contains(entityPermission.UserGroupId))
+                {
+                    groupIdsWithAllowPermission.Add(entityPermission.UserGroupId);
+                }
             }
 
             // Permissions in Umbraco are inherited from ancestor nodes, so look up the tree for further permissions
-            entity = entity.Parent();
+            entity = _contentService.GetById(entity.ParentId);
             if (entity != null)
             {
-                GetPermissionsForNodeWithInheritance(entity, groupIdsWithPermission);
+                GetPermissionsForNodeWithInheritance(entity, groupIdsWithAllowPermission, groupIdsWithDenyPermission);
             }
         }
     }
