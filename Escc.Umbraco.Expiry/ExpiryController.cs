@@ -9,8 +9,8 @@ using Umbraco.Core.Models;
 using Umbraco.Web;
 using Umbraco.Web.WebApi;
 using System.Net;
-using System.Configuration;
 using Examine;
+using Escc.Umbraco.Permissions;
 
 namespace Escc.Umbraco.Expiry
 {
@@ -52,8 +52,8 @@ namespace Escc.Umbraco.Expiry
         {
             try
             {
-                var expiringPagesService = new UmbracoPermissionsService(Services.UserService, Services.ContentService);
-                var nodes = expiringPagesService.GroupsWithPermissionsForPage(pageId);
+                var expiringPagesService = new UmbracoPermissionsReader(Services.UserService, Services.ContentService);
+                var nodes = expiringPagesService.GroupsWithPermissionForPage(pageId, UmbracoPermission.UPDATE);
 
                 return Request.CreateResponse(HttpStatusCode.OK, nodes);
             }
@@ -75,7 +75,7 @@ namespace Escc.Umbraco.Expiry
         {
             try
             {
-                var expiringPagesService = new UmbracoPermissionsService(Services.UserService, Services.ContentService);
+                var expiringPagesService = new UmbracoPermissionsReader(Services.UserService, Services.ContentService);
                 var nodes = expiringPagesService.ActiveUsersInGroup(groupId);
 
                 return Request.CreateResponse(HttpStatusCode.OK, nodes);

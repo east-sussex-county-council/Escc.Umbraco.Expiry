@@ -234,7 +234,6 @@
     <Compile Include="ExpiryRuleEvaluatorTests.cs" />
     <Compile Include="PathRuleMatcherTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UmbracoPermissionsServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
