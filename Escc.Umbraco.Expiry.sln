@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escc.Umbraco.Expiry.Notifie
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escc.Umbraco.Expiry.Web", "Escc.Umbraco.Expiry.Web\Escc.Umbraco.Expiry.Web.csproj", "{478A29F8-7361-4EA1-BCA6-0C19865CFE85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escc.Umbraco.Expiry.Tests", "Escc.Umbraco.Expiry.Tests\Escc.Umbraco.Expiry.Tests.csproj", "{5D30E1EF-74B6-487E-B053-2FB0CBE6A6EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{478A29F8-7361-4EA1-BCA6-0C19865CFE85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{478A29F8-7361-4EA1-BCA6-0C19865CFE85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{478A29F8-7361-4EA1-BCA6-0C19865CFE85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D30E1EF-74B6-487E-B053-2FB0CBE6A6EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D30E1EF-74B6-487E-B053-2FB0CBE6A6EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D30E1EF-74B6-487E-B053-2FB0CBE6A6EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D30E1EF-74B6-487E-B053-2FB0CBE6A6EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
