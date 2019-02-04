@@ -18,7 +18,7 @@ namespace Escc.Umbraco.Expiry.Tests
         {
             var searcher = new Mock<ISearcher>();
             searcher.Setup(x => x.CreateSearchCriteria()).Throws(new AlreadyClosedException("this IndexReader is closed"));
-            var cache = new Mock<ICacheStrategy<DateTime>>();
+            var cache = new Mock<ICacheStrategy>();
             var dateFromExamine = new ExpiryDateFromExamine(1, searcher.Object, cache.Object);
 
             var date = dateFromExamine.ExpiryDate;
@@ -31,7 +31,7 @@ namespace Escc.Umbraco.Expiry.Tests
         {
             var searcher = new Mock<ISearcher>();
             var expectedDate = new DateTime(2019,1,30);
-            var cache = new Mock<ICacheStrategy<DateTime>>();
+            var cache = new Mock<ICacheStrategy>();
             cache.Setup(x => x.ReadFromCache(It.IsAny<string>())).Returns(expectedDate);
             var dateFromExamine = new ExpiryDateFromExamine(1, searcher.Object, cache.Object);
 
