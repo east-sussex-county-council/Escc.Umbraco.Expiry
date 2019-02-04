@@ -11,9 +11,12 @@ The expiry date for a content node is not normally available to controller code 
 
     public override ActionResult Index(RenderModel model)
     {
-		var expiryDateSource = new ExpiryDateFromExamine(model.Content.Id, ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"])
+		var expiryDateSource = new ExpiryDateFromExamine(model.Content.Id, ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"], new ExpiryDateMemoryCache(TimeSpan.FromHours(1)))
 		var expiryDate = expiryDateSource.ExpiryDate
 	} 
+
+In an edge case during heavy load the expiry date may be incorrectly returned as `null` due to an `AlreadyClosedException` thrown by Lucene. This is by design as it is better than asking all calling code
+to catch and handle this exception. The exception will be logged in the standard Umbraco log. 
 
 ## Control unpublishing dates for content
 

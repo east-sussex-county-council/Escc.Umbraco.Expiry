@@ -162,7 +162,7 @@ namespace Escc.Umbraco.Expiry
             try
             {
 
-                var unpublishDate = new ExpiryDateFromExamine(publishedContent.Id, ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"]).ExpiryDate;
+                var unpublishDate = new ExpiryDateFromExamine(publishedContent.Id, ExamineManager.Instance.SearchProviderCollection["ExternalSearcher"], new ExpiryDateMemoryCache(TimeSpan.FromHours(1))).ExpiryDate;
                 if (unpublishDate.HasValue && expiryRule != null && !expiryRule.MaximumExpiry.HasValue)
                 {
                     // Page should never expire

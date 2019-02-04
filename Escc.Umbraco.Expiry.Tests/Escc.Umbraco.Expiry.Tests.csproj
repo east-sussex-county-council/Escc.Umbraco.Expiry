@@ -231,6 +231,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DocumentTypeRuleMatcherTests.cs" />
+    <Compile Include="ExpiryDateFromExamineTests.cs" />
     <Compile Include="ExpiryRuleEvaluatorTests.cs" />
     <Compile Include="PathRuleMatcherTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
