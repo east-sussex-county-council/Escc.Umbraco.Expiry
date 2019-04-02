@@ -108,7 +108,7 @@ namespace Escc.Umbraco.Expiry.Notifier
                     }
                     catch (Exception ex)
                     {
-                        log.Error("Failure sending email to:" + user.User.EmailAddress + " - " + ex.Message);
+                        log.Error("Failure sending email to:" + user.User.Email + " - " + ex.Message);
                         ex.ToExceptionless().Submit();
                     }
 

@@ -53,11 +53,11 @@ namespace Escc.Umbraco.Expiry.Notifier
             {
                 User = new UmbracoUser
                 {
-                    UserId = -1,
-                    EmailAddress = ConfigurationManager.AppSettings["AdminEmail"]
+                    Id = -1,
+                    Email = ConfigurationManager.AppSettings["AdminEmail"]
                 }
             };
-            allUsersWithPages.Add(admin.User.UserId, admin);
+            allUsersWithPages.Add(admin.User.Id, admin);
 
             foreach (var userPage in pages)
             {
@@ -91,17 +91,17 @@ namespace Escc.Umbraco.Expiry.Notifier
                     foreach (var user in usersInGroups[groupId])
                     {
                         // Create a User record if one does not yet exist
-                        if (!allUsersWithPages.ContainsKey(user.UserId))
+                        if (!allUsersWithPages.ContainsKey(user.Id))
                         { 
                             var pagesForUser = new UmbracoPagesForUser
                             {
                                 User = user
                             };
-                            allUsersWithPages.Add(user.UserId, pagesForUser);
+                            allUsersWithPages.Add(user.Id, pagesForUser);
                         }
 
                         // Assign the current page to this author
-                        allUsersWithPages[user.UserId].Pages.Add(userPage);
+                        allUsersWithPages[user.Id].Pages.Add(userPage);
                     }
                 }
             }

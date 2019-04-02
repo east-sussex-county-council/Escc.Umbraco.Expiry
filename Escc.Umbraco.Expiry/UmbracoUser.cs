@@ -21,7 +21,7 @@ namespace Escc.Umbraco.Expiry
 
             var otherUser = (UmbracoUser) other;
 
-            return UserId == otherUser.UserId;
+            return Id == otherUser.Id;
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Escc.Umbraco.Expiry
         /// </returns>
         public override int GetHashCode()
         {
-            return UserId.GetHashCode();
+            return Id.GetHashCode();
         }
 
         /// <summary>
@@ -48,12 +48,12 @@ namespace Escc.Umbraco.Expiry
         /// <summary>
         /// Gets or sets the email address.
         /// </summary>
-        public string EmailAddress { get; set; }
+        public string Email { get; set; }
 
         /// <summary>
         /// Gets or sets the user identifier.
         /// </summary>
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance in activity logs
@@ -63,7 +63,7 @@ namespace Escc.Umbraco.Expiry
         /// </returns>
         public override string ToString()
         {
-            return string.Format("[UserName:{0},FullName:{1},EmailAddress:{2},UserId:{3}]", UserName, FullName, EmailAddress, UserId);
+            return string.Format("[UserName:{0},FullName:{1},Email:{2},Id:{3}]", UserName, FullName, Email, Id);
         }
     }
 }

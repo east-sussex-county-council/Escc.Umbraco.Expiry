@@ -159,7 +159,7 @@ namespace Escc.Umbraco.Expiry.Notifier
             }
             if(lastWarningPages.Any() || nonWarningPages.Any())
             {
-                var emailTo = userPages.User.EmailAddress;
+                var emailTo = userPages.User.Email;
 
                 // If "ForceEmailTo" is set, send all emails there instead (for Testing)
                 if (!string.IsNullOrEmpty(_forceSendTo))
