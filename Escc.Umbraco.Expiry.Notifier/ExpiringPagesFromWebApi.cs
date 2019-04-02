@@ -43,7 +43,7 @@ namespace Escc.Umbraco.Expiry.Notifier
         {
             var response = await _client.GetAsync(string.Format("CheckForExpiringPages?inTheNextHowManyDays={0}", inTheNextHowManyDays));
             if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
-            var pages = response.Content.ReadAsAsync<IEnumerable<UmbracoPage>>().Result;
+            var pages = await response.Content.ReadAsAsync<IEnumerable<UmbracoPage>>();
 
             // For each page:
             var allUsersWithPages = new Dictionary<int, UmbracoPagesForUser>();
@@ -63,7 +63,7 @@ namespace Escc.Umbraco.Expiry.Notifier
             {
                 response = await _client.GetAsync(string.Format("GroupsWithPermissionsForPage?pageId={0}", userPage.PageId));
                 if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
-                var groupsWithPermissionsForNode = response.Content.ReadAsAsync<IEnumerable<int>>().Result;
+                var groupsWithPermissionsForNode = await response.Content.ReadAsAsync<IEnumerable<int>>();
 
                 var usersInGroups = new Dictionary<int, IList<UmbracoUser>>();
 
@@ -75,7 +75,7 @@ namespace Escc.Umbraco.Expiry.Notifier
                     {
                         response = await _client.GetAsync(string.Format("ActiveUsersInGroup?groupId={0}", groupId));
                         if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
-                        usersInGroups[groupId] = response.Content.ReadAsAsync<IList<UmbracoUser>>().Result;
+                        usersInGroups[groupId] = await response.Content.ReadAsAsync<IList<UmbracoUser>>();
                     }
                     pageHasActiveUserWithPermissions = (pageHasActiveUserWithPermissions || usersInGroups[groupId].Count > 0);
                 }

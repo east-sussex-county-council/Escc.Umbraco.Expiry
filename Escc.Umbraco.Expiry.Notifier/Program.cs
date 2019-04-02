@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Escc.Umbraco.Expiry.Notifier
 {
@@ -13,7 +14,7 @@ namespace Escc.Umbraco.Expiry.Notifier
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Program));
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             try
             {
@@ -37,7 +38,7 @@ namespace Escc.Umbraco.Expiry.Notifier
                 IEmailService emailService = new EmailService(emailAdminAtDays, ConfigurationManager.AppSettings["AdminEmail"], ConfigurationManager.AppSettings["ForceSendTo"], ConfigurationManager.AppSettings["WebsiteName"], new Uri(ConfigurationManager.AppSettings["SiteUri"]), new Uri(ConfigurationManager.AppSettings["WebAuthorsGuidanceUrl"]));
                 IExpiryLogRepository logRepository = new SqlServerExpiryLogRepository();
 
-                var users = dataSource.GetExpiringPagesByUser(inTheNextHowManyDays).Result;
+                var users = await dataSource.GetExpiringPagesByUser(inTheNextHowManyDays);
 
                 log.Info("Starting expiry email process");
 
