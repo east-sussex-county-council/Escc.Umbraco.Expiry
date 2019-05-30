@@ -260,7 +260,6 @@
     <Compile Include="UmbracoPagesForUser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="App_Plugins\DocumentTypePicker\package.manifest" />
     <None Include="build-nuget.cmd" />
     <None Include="Escc.Umbraco.Expiry.nuspec" />
