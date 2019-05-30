@@ -52,10 +52,10 @@
       <HintPath>..\packages\ClientDependency-Mvc5.1.8.0.0\lib\net45\ClientDependency.Core.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="Escc.ClientDependencyFramework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Escc.ClientDependencyFramework.2.0.0\lib\Escc.ClientDependencyFramework.dll</HintPath>
+      <HintPath>..\packages\Escc.ClientDependencyFramework.2.0.1\lib\Escc.ClientDependencyFramework.dll</HintPath>
     </Reference>
     <Reference Include="Escc.Web, Version=1.0.0.0, Culture=neutral, PublicKeyToken=06fad7304560ae6f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Escc.Web.1.1.0\lib\Escc.Web.dll</HintPath>
+      <HintPath>..\packages\Escc.Web.1.1.2\lib\Escc.Web.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.8.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>

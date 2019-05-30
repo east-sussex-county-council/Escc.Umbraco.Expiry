@@ -100,8 +100,12 @@ namespace Escc.Umbraco.Expiry.Notifier
                             allUsersWithPages.Add(user.Id, pagesForUser);
                         }
 
-                        // Assign the current page to this author
-                        allUsersWithPages[user.Id].Pages.Add(userPage);
+                        // Assign the current page to this author, unless they already have it 
+                        // through their membership of another group.
+                        if (!allUsersWithPages[user.Id].Pages.Any(page => page.PageId == userPage.PageId))
+                        {
+                            allUsersWithPages[user.Id].Pages.Add(userPage);
+                        }
                     }
                 }
             }
