@@ -35,7 +35,7 @@ Create document types in Umbraco matching the following specification to allow e
 2.	Create another document type (without a template) called 'Document type expiry rule' (alias `documentTypeExpiryRule`). Add five properties on a tab called 'Settings':
 
 	* 'Document types' (alias `documentTypes`) using the 'Document type picker' property editor.
-	* 'Level' (alias `level`), using a custom data type based on 'Numeric' with a minimum value of 1, step size of 1 and no maximum.
+	* 'Level' (alias `levelInContentTree`), using a custom data type based on 'Numeric' with a minimum value of 1, step size of 1 and no maximum.
 	* 'Force pages to never expire' (alias `forcePagesToNeverExpire`) using the 'True/false' property editor.
 	* 'Months (alias `months`), using the same custom data type as the previous 'Months' property.  Validate the property as a number.
 	* 'Days' (alias `days`), using the same custom data type as 'Months'.  Validate the property as a number.

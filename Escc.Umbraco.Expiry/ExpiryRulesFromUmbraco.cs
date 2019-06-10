@@ -67,7 +67,7 @@ namespace Escc.Umbraco.Expiry
                 {
                     var rule = new DocumentTypeExpiryRule() { Alias = documentType };
 
-                    string savedLevel = documentTypeRule.GetPropertyValue<string>("level");
+                    string savedLevel = documentTypeRule.GetPropertyValue<string>("levelInContentTree");
                     int? parsedLevel = null;
 
                     if (!String.IsNullOrEmpty(savedLevel))
