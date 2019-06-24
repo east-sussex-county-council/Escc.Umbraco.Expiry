@@ -92,7 +92,7 @@ namespace Escc.Umbraco.Expiry.Notifier
             body.AppendLine("<ul>");
             body.AppendLine("<li>check they are up to date</li>");
             body.AppendLine("<li>check the information is still needed</li>");
-            body.AppendLine("<li>go to Properties tab and use the calendar to set a new date in the 'Unpublish at' box</li>");
+            body.AppendLine("<li>go to Info tab and set a new 'Unpublish at' date in the 'Scheduled Publishing' box</li>");
             body.AppendLine("<li>then click 'Save and publish'.</li>");
             body.AppendLine("</ul>");
             body.AppendLine("<p>For details on updating your pages, see <a href=\"" + _webAuthorGuidanceUrl + "\">Guidance for web authors</a>.</p>");
@@ -190,7 +190,7 @@ namespace Escc.Umbraco.Expiry.Notifier
             body.AppendLine("<ul>");
             body.AppendLine("<li>check they are up to date</li>");
             body.AppendLine("<li>check the information is still needed</li>");
-            body.AppendLine("<li>go to Properties tab and use the calendar to set a new date in the 'Unpublish at' box</li>");
+            body.AppendLine("<li>go to Info tab and set a new 'Unpublish at' date in the 'Scheduled Publishing' box</li>");
             body.AppendLine("<li>then click 'Save and publish'.</li>");
             body.AppendLine("</ul>");
             body.AppendLine("<p>For details on updating your pages, see <a href=\"" + _webAuthorGuidanceUrl + "\">Guidance for web authors</a>.</p>");
