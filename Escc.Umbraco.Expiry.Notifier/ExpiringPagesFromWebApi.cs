@@ -41,8 +41,9 @@ namespace Escc.Umbraco.Expiry.Notifier
         /// <exception cref="WebException"></exception>
         public async Task<IList<UmbracoPagesForUser>> GetExpiringPagesByUser(int inTheNextHowManyDays)
         {
-            var response = await _client.GetAsync(string.Format("CheckForExpiringPages?inTheNextHowManyDays={0}", inTheNextHowManyDays));
-            if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
+            var url = _client.BaseAddress + string.Format("CheckForExpiringPages?inTheNextHowManyDays={0}", inTheNextHowManyDays);
+            var response = await _client.GetAsync(url);
+            if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + $" {response.ReasonPhrase} requesting {url}");
             var pages = await response.Content.ReadAsAsync<IEnumerable<UmbracoPage>>();
 
             // For each page:
@@ -61,8 +62,9 @@ namespace Escc.Umbraco.Expiry.Notifier
 
             foreach (var userPage in pages)
             {
-                response = await _client.GetAsync(string.Format("GroupsWithPermissionsForPage?pageId={0}", userPage.PageId));
-                if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
+                url = _client.BaseAddress + string.Format("GroupsWithPermissionsForPage?pageId={0}", userPage.PageId);
+                response = await _client.GetAsync(url);
+                if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + $" {response.ReasonPhrase} requesting {url}");
                 var groupsWithPermissionsForNode = await response.Content.ReadAsAsync<IEnumerable<int>>();
 
                 var usersInGroups = new Dictionary<int, IList<UmbracoUser>>();
@@ -73,8 +75,9 @@ namespace Escc.Umbraco.Expiry.Notifier
                 {
                     if (!usersInGroups.ContainsKey(groupId))
                     {
-                        response = await _client.GetAsync(string.Format("ActiveUsersInGroup?groupId={0}", groupId));
-                        if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + " " + response.ReasonPhrase);
+                        url = _client.BaseAddress + string.Format("ActiveUsersInGroup?groupId={0}", groupId);
+                        response = await _client.GetAsync(url);
+                        if (!response.IsSuccessStatusCode) throw new WebException(((int)response.StatusCode).ToString(CultureInfo.InvariantCulture) + $" {response.ReasonPhrase} requesting {url}");
                         usersInGroups[groupId] = await response.Content.ReadAsAsync<IList<UmbracoUser>>();
                     }
                     pageHasActiveUserWithPermissions = (pageHasActiveUserWithPermissions || usersInGroups[groupId].Count > 0);
